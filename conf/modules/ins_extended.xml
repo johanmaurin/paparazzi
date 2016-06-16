@@ -1,0 +1,20 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="ins">
+  <doc>
+    <description>
+      extended INS with vertical filter using sonar.
+    </description>
+  </doc>
+  <header>
+    <file name="ins.h" dir="subsystems"/>
+  </header>
+  <init fun="ins_init()"/>
+  <makefile target="ap|nps">
+    <define name="INS_TYPE_H" value="subsystems/ins/ins_int.h" type="string"/>
+    <file name="ins.c" dir="subsystems"/>
+    <file name="ins_int.c" dir="subsystems/ins"/>
+    <file name="vf_extended_float.c" dir="subsystems/ins"/>
+    <define name="USE_VFF_EXTENDED"/>
+  </makefile>
+</module>

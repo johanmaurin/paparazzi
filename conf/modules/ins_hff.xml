@@ -1,0 +1,21 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="ins_hff">
+  <doc>
+    <description>
+      INS with float vertical and horizontal filters.
+    </description>
+  </doc>
+  <header>
+    <file name="ins.h" dir="subsystems"/>
+  </header>
+  <init fun="ins_init()"/>
+  <makefile target="ap|nps">
+    <define name="INS_TYPE_H" value="subsystems/ins/ins_int.h" type="string"/>
+    <file name="ins.c" dir="subsystems"/>
+    <file name="ins_int.c" dir="subsystems/ins"/>
+    <file name="vf_float.c" dir="subsystems/ins"/>
+    <file name="hf_float.c" dir="subsystems/ins"/>
+    <define name="USE_HFF"/>
+  </makefile>
+</module>

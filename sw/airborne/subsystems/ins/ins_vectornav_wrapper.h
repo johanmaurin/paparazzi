@@ -35,8 +35,6 @@
 #define DefaultInsImpl ins_vectornav
 #endif
 
-#define InsEvent ins_vectornav_event
-
 extern void ins_vectornav_register(void);
 
 #ifndef PRIMARY_GPS
