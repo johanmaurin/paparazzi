@@ -62,7 +62,7 @@
     <module name="gps" type="ublox"/>
 
     <!--module name="rtos_mon"/-->
-    <module name="raspberry"/>
+    <module name="wind_raspi_estimator"/>
 
     <!--module name="spi_master"/-->
     <!-- <module name="mcp355x"> -->

@@ -1,0 +1,15 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="wind_estimator" dir="meteo">
+  <doc>
+    <description>Wind Estimator</description>
+  </doc>
+  <header>
+    <file name="wind_estimator.h"/>
+  </header>
+   <init fun="wind_estimator_init()"/>
+  <makefile>
+    <file name="wind_estimator.c"/>
+  </makefile>
+</module>
+

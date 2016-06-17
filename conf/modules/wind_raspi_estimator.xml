@@ -1,13 +1,13 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="raspberry">
+<module name="wind_raspi_estimator">
   <doc>
-    <description>Wind Estimation</description>
+    <description>Wind Raspberry Pi Estimation</description>
   </doc>
   <header>
-    <file name="raspberry.h"/>
+    <file name="wind_raspi_estimator.h"/>
   </header>
-  <init fun="init_mf_daq()"/>
+  <init fun="init_extra_pprz_raspi()"/>
   <periodic fun="send_data_to_wind_estimation()" freq="50."  autorun="LOCK"/>
   <!--datalink message="WIND_INFO" fun="get_wind_from_wind_estimation()"/-->
   <makefile>

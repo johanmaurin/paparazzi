@@ -18,11 +18,11 @@
  * <http://www.gnu.org/licenses/>.
  */
 /**
- * @file "modules/raspberry/raspberry.c"
+ * @file "modules/wind_raspi_estimator/wind_raspi_estimator.c"
  * @author Maurin
- * Wind Estimation
+ * Wind Raspberry Pi Estimation
  */
-#include "raspberry.h"
+#include "wind_raspi_estimator.h"
 #include "state.h"
 #include "autopilot.h"
 #include "subsystems/datalink/datalink.h"
@@ -101,10 +101,10 @@ void get_wind_from_wind_estimation(){
 	if(i==NBR_ANSWER){
 	}
 }
-/*--------------init_mf_daq---------------------------*/
+/*--------------init_extra_pprz_raspi-----------------*/
 /*  Init fonction 									  */
 /*----------------------------------------------------*/
-void init_mf_daq(void)
+void init_extra_pprz_raspi(void)
 {
 	extra_pprz_dl_init();
 }

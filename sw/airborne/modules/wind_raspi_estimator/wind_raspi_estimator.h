@@ -18,9 +18,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 /**
- * @file "modules/raspberry/raspberry.h"
+ * @file "modules/wind_raspi_estimator/wind_raspi_estimator.h"
  * @author Maurin
- * Wind Estimation
+ * Wind Raspberry Pi Estimation
  */
 
 #ifndef WIND_EST
@@ -86,7 +86,7 @@ union Answer_State{
 };
 extern union Answer_State Answer_State;
 
-extern void init_mf_daq(void);
+extern void init_extra_pprz_raspi(void);
 extern int storage_data_from_state(void);
 extern void send_data_to_wind_estimation(void);
 extern void get_wind_from_wind_estimation(void);
