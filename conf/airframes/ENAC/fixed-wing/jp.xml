@@ -31,9 +31,17 @@
     </target>
 
     <module name="radio_control" type="ppm"/>
+    
 
     <!-- Communication -->
     <module name="telemetry" type="xbee_api"/>
+    
+    <module name="extra_dl">
+	<configure name="EXTRA_DL_PORT" value="UART6"/>
+        <configure name="EXTRA_DL_PORT_LOWER" value="uart6"/>
+    	<configure name="EXTRA_DL_BAUD" value="B57600"/>
+    </module>
+    <module name="raspberry"/>
 
     <!-- Actuators are automatically chosen according to board-->
     <module name="imu" type="apogee">

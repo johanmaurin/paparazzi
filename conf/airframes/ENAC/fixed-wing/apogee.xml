@@ -12,10 +12,32 @@
     <target name="ap" board="apogee_1.0_chibios">
       <module name="radio_control" type="sbus"/>
       <configure name="PERIODIC_FREQUENCY" value="100"/>
+      <module name="extra_dl">
+	<configure name="EXTRA_DL_PORT" value="UART6"/>
+    	<configure name="EXTRA_DL_BAUD" value="B57600"/>
+      </module>
     </target>
     <target name="sim" board="pc">
       <module name="radio_control" type="ppm"/>
     </target>
+    <target name="nps" board="pc">
+      <!-- Note NPS needs the ppm type radio_control module -->
+      <module name="fdm" type="jsbsim"/>
+      <!--module name="ins" type="float_invariant">
+        <configure name="AHRS_PROPAGATE_FREQUENCY" value="125"/>
+        <configure name="AHRS_CORRECT_FREQUENCY" value="125"/>
+        <define name="BARO_BOARD_APOGEE_FREQ" value="50"/>
+        <define name="MPL3115_OVERSAMPLING" value="2"/>
+        <define name="SEND_INVARIANT_FILTER"/>
+      </module-->
+      <module name="radio_control" type="ppm"/>
+      <module name="extra_dl">
+	<configure name="EXTRA_DL_PORT" value="UDP0"/>
+    	<configure name="EXTRA_DL_BAUD" value="B57600"/> <!-- for compilation only -->
+      </module>
+    </target>
+
+    
 
     <define name="USE_I2C1"/>
     <!--define name="USE_I2C2"/-->
@@ -40,6 +62,7 @@
     <module name="gps" type="ublox"/>
 
     <!--module name="rtos_mon"/-->
+    <module name="raspberry"/>
 
     <!--module name="spi_master"/-->
     <!-- <module name="mcp355x"> -->
@@ -97,13 +120,42 @@
 
   <section name="IMU" prefix="IMU_">
     <!-- Calibration Neutral -->
-    <define name="GYRO_P_NEUTRAL" value="0"/>
-    <define name="GYRO_Q_NEUTRAL" value="0"/>
-    <define name="GYRO_R_NEUTRAL" value="0 "/>
+    <define name="GYRO_P_SIGN" value="1"/>
+    <define name="GYRO_Q_SIGN" value="-1"/>
+    <define name="GYRO_R_SIGN" value="-1"/>
+    <define name="GYRO_P_NEUTRAL" value="-50"/>
+    <define name="GYRO_Q_NEUTRAL" value="20"/>
+    <define name="GYRO_R_NEUTRAL" value="-45"/>
+    <!--define name="GYRO_P_NEUTRAL" value="-66"/>
+    <define name="GYRO_Q_NEUTRAL" value="25"/>
+    <define name="GYRO_R_NEUTRAL" value="55"/-->
 
-    <define name="ACCEL_X_NEUTRAL" value="0"/>
-    <define name="ACCEL_Y_NEUTRAL" value="0"/>
-    <define name="ACCEL_Z_NEUTRAL" value="0"/>
+    <define name="ACCEL_X_SIGN" value="1"/>
+    <define name="ACCEL_Y_SIGN" value="-1"/>
+    <define name="ACCEL_Z_SIGN" value="-1"/>
+    <define name="ACCEL_X_NEUTRAL" value="29"/>
+    <define name="ACCEL_Y_NEUTRAL" value="38"/>
+    <define name="ACCEL_Z_NEUTRAL" value="117"/>
+    <define name="ACCEL_X_SENS" value="2.4633147596" integer="16"/>
+    <define name="ACCEL_Y_SENS" value="2.44625155655" integer="16"/>
+    <define name="ACCEL_Z_SENS" value="2.44963539606" integer="16"/>
+
+    <!--define name="ACCEL_X_NEUTRAL" value="109"/>
+    <define name="ACCEL_Y_NEUTRAL" value="13"/>
+    <define name="ACCEL_Z_NEUTRAL" value="-404"/>
+    <define name="ACCEL_X_SENS" value="2.45045342816" integer="16"/>
+    <define name="ACCEL_Y_SENS" value="2.44747844234" integer="16"/>
+    <define name="ACCEL_Z_SENS" value="2.42689216106" integer="16"/-->
+
+    <define name="MAG_X_SIGN" value="1"/>
+    <define name="MAG_Y_SIGN" value="-1"/>
+    <define name="MAG_Z_SIGN" value="-1"/>
+    <define name="MAG_X_NEUTRAL" value="27"/>
+    <define name="MAG_Y_NEUTRAL" value="-241"/>
+    <define name="MAG_Z_NEUTRAL" value="139"/>
+    <define name="MAG_X_SENS" value="3.89895537059" integer="16"/>
+    <define name="MAG_Y_SENS" value="3.96680514301" integer="16"/>
+    <define name="MAG_Z_SENS" value="4.60606895547" integer="16"/>
 
     <define name="BODY_TO_IMU_PHI" value="0"/>
     <define name="BODY_TO_IMU_THETA" value="0"/>
@@ -219,5 +271,13 @@
     <!--define name="ROLL_RESPONSE_FACTOR" value="10"/>
     <define name="MAX_ROLL_DOT" value="20" unit="rad/s"/-->
   </section>
+
+  <section name="SIMULATOR" prefix="NPS_">
+    <define name="JSBSIM_LAUNCHSPEED" value="15"/>
+    <define name="JSBSIM_MODEL" value="easystar" type="string"/>
+    <define name="SENSORS_PARAMS" value="nps_sensors_params_invariant.h" type="string"/>
+    <define name="JS_AXIS_MODE" value="4"/>
+  </section>
+  
 
 </airframe>
