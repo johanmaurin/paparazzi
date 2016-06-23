@@ -11,7 +11,7 @@
   <periodic fun="send_data_to_wind_estimation()" freq="50."  autorun="LOCK"/>
   <!--datalink message="WIND_INFO" fun="get_wind_from_wind_estimation()"/-->
   <makefile>
-    <file name="raspberry.c"/>
+    <file name="wind_raspi_estimator.c"/>
     <define name="WIND_INFO_RET"/>
   </makefile>
 </module>

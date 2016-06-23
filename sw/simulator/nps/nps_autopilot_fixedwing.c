@@ -131,7 +131,7 @@ void nps_autopilot_run_step(double time)
     AbiSendMsgTEMPERATURE(BARO_SIM_SENDER_ID, (float)sensors.temp.value);
   }
 
-#if USE_AIRSPEED
+#if USE_AIRSPEED || USE_NPS_AIRSPEED
   if (nps_sensors_airspeed_available()) {
     stateSetAirspeed_f((float)sensors.airspeed.value);
     Fbw(event_task);

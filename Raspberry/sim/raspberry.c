@@ -117,6 +117,9 @@ void send_wind_estimation(){
     /*The last data*/
 	/*Down : Xout 6*/
 	add_data_to_ivy_string_FLOAT(full_data,Answer_State.storage_tab_float[5],1);
+	/*The Fifth data*/
+	/*Down : Xout 0*/
+	add_data_to_ivy_string_FLOAT(full_data,Answer_State.storage_tab_float[0],0);
 	/*The Forth data is a copy*/ 
 	/*North : Xout 3*/
     add_data_to_ivy_string_FLOAT(full_data,Answer_State.storage_tab_float[3],0);
@@ -124,12 +127,13 @@ void send_wind_estimation(){
     /*Eath : Xout 4*/
 	add_data_to_ivy_string_FLOAT(full_data,Answer_State.storage_tab_float[4],0);
 	/*The Second data is a copy*/ 
-   add_data_to_ivy_string_UINT8(full_data,compare,0);
+   add_data_to_ivy_string_UINT8(full_data,3,0);
 	/*The First data is a copy*/ 
 	add_data_to_ivy_string_UINT8(full_data,ID_AC,0);
 	/*reverse the string of data (full_data)*/
 	reverse_string(full_data);
 	/*Send data to ivy*/
+	
 	IvySendMsg("Wind_estimator WIND_INFO %s", full_data);
 	/*reset some param for the new step*/
     i_2=0;
@@ -184,9 +188,7 @@ void parse_data_for_wind_estimation(){
 	/*Put data in Alpha*/	
 	Gen_UKF_U.theta = Data_State.storage_tab_float[i];
 	i++;
-	printf("Before step\n");
 	Gen_UKF_step();
-	printf("After step\n");
 }
 /*------------------get_wind--------------------------*/
 /* Fonction will get the out's calcul in the structure*/						
@@ -372,7 +374,6 @@ static void parse_check_message(IvyClientPtr app, void *user_data, int argc, cha
 	char *token;
    
 	token = strtok(argv[0], s);
-    printf("Start \n");
     fprintf(fp, "DATA_RECEIVE:\n");
 	while( (token != NULL) && (i<NBR_DATA)) 
 	{
@@ -386,7 +387,6 @@ static void parse_check_message(IvyClientPtr app, void *user_data, int argc, cha
 	if(i<=(NBR_DATA)){
 		parse_data_for_wind_estimation();
 		send_wind_estimation();
-		printf("\nSend back\n");
 	}else{
 		send_error();
 	}

@@ -1,7 +1,9 @@
-#ifndef RASPB
-#define RASPB
+#ifndef UKF_LIB
+#define UKF_LIB
 #include <stdio.h>
 #include <stdlib.h>
+#include "../../../math/pprz_algebra_float.h"
+#include "../../../math/pprz_geodetic_float.h"
 /* Different variable about the data size*/
 #define NBR_DATA 17		  //Number of data to recive
 #define NBR_ANSWER 6	  //Number of data to answer
@@ -51,8 +53,8 @@ union Answer_State{
 };
 extern union Answer_State Answer_State;
 
-extern void parse_data_for_wind_estimation();
-extern void get_wind();
-extern void init_calculator();
+extern void parse_data_for_wind_estimation(void);
+extern void get_wind(void);
+extern void init_calculator(void);
 
 #endif

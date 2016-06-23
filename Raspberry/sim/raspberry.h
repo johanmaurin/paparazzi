@@ -7,7 +7,7 @@
 #define NBR_DATA 17		  //Number of data to recive
 #define NBR_DIFF_ANSWER 2 //Number of the different type of data to answer
 #define NBR_ANSWER 42	  //Number of data to answer
-#define NBR_DATA_SEND_BACK 5
+#define NBR_DATA_SEND_BACK 6
 #define NAME_FILE "Info"
 
 /*---------------------size_of_data--------------------------------*/

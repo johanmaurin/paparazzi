@@ -47,7 +47,7 @@ struct Data_struc{
 /*	float  omegaa_p;
 	float  omegaa_q;
 	float  omegaa_r;*/
-	struct EcefCoor_f omega_A;
+	struct NedCoor_f omega_A;
 /*	float  omegaa_Ax;
 	float  omegaa_Ay;
 	float  omegaa_Az;*/

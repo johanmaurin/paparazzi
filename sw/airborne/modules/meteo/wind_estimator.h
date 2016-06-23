@@ -12,6 +12,8 @@
 
 #ifndef WIND_ESTIMATOR_H
 #define WIND_ESTIMATOR_H
+#include "lib_ukf_wind_estimator/calculate_wind.h"
+
 
 extern void wind_estimator_init(void);
 

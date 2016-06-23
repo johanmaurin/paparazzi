@@ -9,19 +9,24 @@
  * @author Maurin
  * Wind Estimator
  */
-
-#include "modules/meteo/wind_estimator.h"
-#include "lib_ukf_wind_estimator/calculate_wind.h"
-
+#include "std.h"
+//#include "ff.h"
+#include "pprzlink/pprzlink_device.h"
+#include "state.h"
 #include <ch.h>
 #include <hal.h>
 #include "main_chibios.h"
 #include "modules/loggers/sdlog_chibios/sdLog.h"
 #include "modules/loggers/sdlog_chibios/usbStorage.h"
 #include "modules/loggers/sdlog_chibios.h"
-#include "mcu_periph/adc.h"
-#include "led.h"
+#include "wind_estimator.h"
+#include <time.h>  
 
+#define PERIODE_WIND_ESTIMATION 0.02 
+
+union Data_State Data_State;
+union Answer_State Answer_State;
+	
 /*
  * Start log thread
  */
@@ -58,8 +63,14 @@ static void thd_windestimate(void *arg)
 {
   (void) arg;
   chRegSetThreadName("start wind estimation");
+  clock_t t;
+  float t_s;
+  float time_to_wait;
+
+    
   
   while (TRUE){
+	  t = clock(); 
 	  
 	  get_data_from_state();
 	  parse_data_for_wind_estimation();
@@ -67,10 +78,12 @@ static void thd_windestimate(void *arg)
 	  put_data_in_state();
 	  
 	  
-	  
+	  t = clock() - t;   
+	  t_s =(((float)t)/CLOCKS_PER_SEC);
+	  time_to_wait = t_s - PERIODE_WIND_ESTIMATION;
+	  if(time_to_wait>0){
+		  chThdSleepMilliseconds(time_to_wait*1000);
+	  }
   }
-
-  // Wait before starting the log if needed
-  chThdSleepSeconds (SDLOG_START_DELAY);
 }
 

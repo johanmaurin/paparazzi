@@ -27,6 +27,7 @@
 #include "autopilot.h"
 #include "subsystems/datalink/datalink.h"
 #include "subsystems/datalink/downlink.h"
+#include <math.h>
 
 #include "subsystems/gps.h"
 #include "modules/datalink/extra_pprz_dl.h"
@@ -49,14 +50,14 @@ void get_data_from_state(void){
 	
 	get_old_data();
 	
-	Data_State.storage.omega = *stateGetBodyRates_f();
-	Data_State.storage.omega_A = *stateGetAccelEcef_f();
-	Data_State.storage.Zk_V = *stateGetSpeedNed_f();
-	Data_State.storage.Zk_Va = stateGetHorizontalSpeedNorm_f();
-	Data_State.storage.Zk_AOA = stateGetAngleOfAttack_f();
+	Data_State.storage.omega = *stateGetBodyRates_f(); //   rad/s
+	Data_State.storage.omega_A = *stateGetAccelNed_f(); //   m/s^2
+	Data_State.storage.Zk_V = *stateGetSpeedNed_f(); //    m/s
+	Data_State.storage.Zk_Va =  stateGetAirspeed_f()*cos(stateGetAngleOfAttack_f());    //    m/s  // projection de la norme qur l'axe X (cos sin)
+	Data_State.storage.Zk_AOA = stateGetAngleOfAttack_f();   // rad.
 	Data_State.storage.q = *stateGetNedToBodyQuat_f();
-	Data_State.storage.phi = stateGetNedToBodyEulers_f()->phi;
-	Data_State.storage.theta = stateGetNedToBodyEulers_f()->phi;
+	Data_State.storage.phi = stateGetNedToBodyEulers_f()->phi; //rad
+	Data_State.storage.theta = stateGetNedToBodyEulers_f()->theta; //rad
 }
 /*--------------storage_data_from_state---------------*/
 /*  Use get_data_from_state and check if all data is  */

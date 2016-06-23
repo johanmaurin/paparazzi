@@ -33,12 +33,12 @@
       <module name="radio_control" type="ppm"/>
       <module name="extra_dl">
 	<configure name="EXTRA_DL_PORT" value="UDP0"/>
-    	<configure name="EXTRA_DL_BAUD" value="B57600"/> <!-- for compilation only -->
+    	<configure name="EXTRA_DL_BAUD" value="B57600"/><!-- for compilation only -->
       </module>
     </target>
 
     
-
+	
     <define name="USE_I2C1"/>
     <!--define name="USE_I2C2"/-->
     <!--define name="AGR_CLIMB"/-->
@@ -61,8 +61,11 @@
     <!-- Sensors -->
     <module name="gps" type="ublox"/>
 
-    <!--module name="rtos_mon"/-->
-    <module name="wind_raspi_estimator"/>
+    <!--module name="wind_raspi_estimator"/-->
+    <define name="USE_NPS_AIRSPEED"/>
+    <define name="USE_NPS_SLIDESPEED"/>
+    <define name="USE_NPS_AOA"/>
+    <module name="wind_estimator"/>
 
     <!--module name="spi_master"/-->
     <!-- <module name="mcp355x"> -->
