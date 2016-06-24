@@ -9,49 +9,9 @@
 #include <stdint.h>
 /*--------------------------------------Global variables---------------------------------------*/
 #define VAL_DEFAULT -100000.42					//Default valeur for old data
-	
-int ID_AC = 1;									//ID of the aircraft
-float old_data_2[NBR_DATA_SEND_BACK-2];			//Stock data to compare
-int i_2=0;										//location in the tabl of old data
-int compare = 0;								//Number of same data betwenn old and new data
 FILE * fp;
+int ID_AC;
 /*---------------------------------------------------------------------------------------------*/
-/*--------------------init_old------------------------*/
-/* Init the old data at begin with   VAL_DEFAULT      */
-/*----------------------------------------------------*/
-void init_old(){
-	int i;
-	for(i=0;i<(NBR_DATA_SEND_BACK-2);i++){
-		old_data_2[i]=VAL_DEFAULT;
-	}
-}
-/*------------------reverse_string--------------------*/
-/*  Reverse the char* but not char by char but        */
-/*    chaine of char separate by " "  (space)         */
-/*          full_data: char* to reverse      		  */
-/*----------------------------------------------------*/
-void reverse_string(char* full_data){
-	
-	char new[NBR_DATA_SEND_BACK][10];
-	
-	int i=0;
-	const char s[2] = " ";
-	char *token;
-   
-	token = strtok(full_data, s);
-	while( (token != NULL) && (i<NBR_DATA_SEND_BACK)) 
-	{
-		strcpy(new[i], token);
-		token = strtok(NULL, s);
-		i++;
-	}
-	strcpy(full_data,new[NBR_DATA_SEND_BACK-1]);
-	for(i=NBR_DATA_SEND_BACK-2;i>-1;i--){
-		strcat(full_data, " ");
-		strcat(full_data,new[i]);
-	}
-	free(token);
-}
 /*---------add_data_to_ivy_string_UINT8---------------*/
 /*  Add a data to the char* full_data                 */
 /*    char* full_data: char* where the var will be add*/
@@ -67,15 +27,7 @@ void add_data_to_ivy_string_UINT8( char * full_data, int var,int first){
 		strcpy(full_data, array);
 	}else{
 		strcat(full_data, array);
-	}
-    if(old_data_2[i_2]!= VAL_DEFAULT){
-		if(var==(int)old_data_2[i_2]){
-			compare++;
-		}
-	}
-    old_data_2[i_2]=(float)var;
-    i_2++;
-    
+	} 
 }
 /*---------add_data_to_ivy_string_FLOAT---------------*/
 /*  Add a data to the char* full_data                 */
@@ -93,14 +45,6 @@ void add_data_to_ivy_string_FLOAT( char * full_data, float var,int first){
 	}else{
 		strcat(full_data, array);
 	}
-    
-    if(old_data_2[i_2]!= VAL_DEFAULT){
-		if(var==(float)old_data_2[i_2]){
-			compare++;
-		}
-	}
-    old_data_2[i_2]=(float)var;
-    i_2++;
 }
 /*--------------send_wind_estimation------------------*/
 /*  Fonction call to send data to the airdraft        */
@@ -114,30 +58,27 @@ void send_wind_estimation(){
 	char array[10];                            //array will containe the different float value
     char *full_data = (char *) malloc(sizeof(array)*NBR_DATA_SEND_BACK); //Chaine of char will containe the all data
     
-    /*The last data*/
-	/*Down : Xout 6*/
-	add_data_to_ivy_string_FLOAT(full_data,Answer_State.storage_tab_float[5],1);
-	/*The Fifth data*/
-	/*Down : Xout 0*/
-	add_data_to_ivy_string_FLOAT(full_data,Answer_State.storage_tab_float[0],0);
+	/*The First data is a copy*/ 
+	add_data_to_ivy_string_UINT8(full_data,ID_AC,0);
+	/*The Second data is a copy*/ 
+   add_data_to_ivy_string_UINT8(full_data,3,0);
+   /*The Third data is a copy*/ 
+    /*Eath : Xout 4*/
+	add_data_to_ivy_string_FLOAT(full_data,Answer_State.storage_tab_float[4],0);
 	/*The Forth data is a copy*/ 
 	/*North : Xout 3*/
     add_data_to_ivy_string_FLOAT(full_data,Answer_State.storage_tab_float[3],0);
-    /*The Third data is a copy*/ 
-    /*Eath : Xout 4*/
-	add_data_to_ivy_string_FLOAT(full_data,Answer_State.storage_tab_float[4],0);
-	/*The Second data is a copy*/ 
-   add_data_to_ivy_string_UINT8(full_data,3,0);
-	/*The First data is a copy*/ 
-	add_data_to_ivy_string_UINT8(full_data,ID_AC,0);
-	/*reverse the string of data (full_data)*/
-	reverse_string(full_data);
+    /*The Fifth data*/
+	/*Down : Xout 0*/
+	add_data_to_ivy_string_FLOAT(full_data,Answer_State.storage_tab_float[0],0);
+	/*The last data*/
+	/*Down : Xout 6*/
+	add_data_to_ivy_string_FLOAT(full_data,Answer_State.storage_tab_float[5],1);
+	
 	/*Send data to ivy*/
 	
 	IvySendMsg("Wind_estimator WIND_INFO %s", full_data);
 	/*reset some param for the new step*/
-    i_2=0;
-    compare = 0;
     printf("\nDATA\n");
     fprintf(fp, "DATA_GEN_UKF:\n");
     for(i =0;i<6;i++){
@@ -358,9 +299,6 @@ void init(){
 	Gen_UKF_U.P[33]=0;
 	Gen_UKF_U.P[34]=0;
 	Gen_UKF_U.P[35]=0.2;
-	
-	
-	init_old();
 }
 
 /*--------------parse_check_message-------------------*/
@@ -372,8 +310,10 @@ static void parse_check_message(IvyClientPtr app, void *user_data, int argc, cha
 	int i=0;
 	const char s[2] = ",";
 	char *token;
+    
+    ID_AC = atoi(argv[0]);
    
-	token = strtok(argv[0], s);
+	token = strtok(argv[1], s);
     fprintf(fp, "DATA_RECEIVE:\n");
 	while( (token != NULL) && (i<NBR_DATA)) 
 	{
@@ -402,7 +342,7 @@ int main ( int argc, char** argv) {
   
   IvyInit ("Rasp", "Wind Estimate READY", 0, 0, 0, 0);
   IvyStart("127.255.255.255");
-  IvyBindMsg(parse_check_message, 0,  "^1 PAYLOAD_FLOAT (.*)");
+  IvyBindMsg(parse_check_message, 0,  "^([0-9]{1,2}) PAYLOAD_FLOAT (.*)");
   g_main_loop_run(ml);
 
   return 0;
