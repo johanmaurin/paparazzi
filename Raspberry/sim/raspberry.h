@@ -8,7 +8,7 @@
 #define NBR_DIFF_ANSWER 2 //Number of the different type of data to answer
 #define NBR_ANSWER 42	  //Number of data to answer
 #define NBR_DATA_SEND_BACK 6
-#define NAME_FILE "Info"
+#define NAME_FILE "Log_file_data_"
 
 /*---------------------size_of_data--------------------------------*/
 /*Array of int to precise the size of the different type of data   */

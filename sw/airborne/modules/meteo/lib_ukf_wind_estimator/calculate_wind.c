@@ -16,24 +16,24 @@ void parse_data_for_wind_estimation(void){
 	/*Put data in OmegaA*/
 	j=0;
 	for(i=0;i<6;i++){
-		Gen_UKF_U.omegaa[i]=data_ukf.storage_tab_float[j];
+		Gen_UKF_U.omegaa[i]=Data_State.storage_tab_float[j];
 		j++;
 	}
 	/*Put data in Zk*/
 	for(i=0;i<5;i++){
-		Gen_UKF_U.zk[i]=data_ukf.storage_tab_float[j];
+		Gen_UKF_U.zk[i]=Data_State.storage_tab_float[j];
 		j++;
 	}
 	/*Put data in Q (the quaterion)*/	
 	for(i=0;i<4;i++){
-		Gen_UKF_U.q[i]=data_ukf.storage_tab_float[j];
+		Gen_UKF_U.q[i]=Data_State.storage_tab_float[j];
 		j++;
 	}
 	/*Put data in Phi*/	
-	Gen_UKF_U.phi = data_ukf.storage_tab_float[i];
+	Gen_UKF_U.phi = Data_State.storage_tab_float[i];
 	i++;
 	/*Put data in Alpha*/	
-	Gen_UKF_U.theta = data_ukf.storage_tab_float[i];
+	Gen_UKF_U.theta = Data_State.storage_tab_float[i];
 	Gen_UKF_step();
 }
 /*------------------get_wind--------------------------*/
@@ -45,7 +45,7 @@ void get_wind(void){
 	
 	j=0;
 	for(i=i;i<size_of_answer[0];i++){
-		answer_ukf.storage_tab_float[i] = (float)Gen_UKF_Y.xout[j];
+		Answer_State.storage_tab_float[i] = (float)Gen_UKF_Y.xout[j];
 		j++;
 	}
 }

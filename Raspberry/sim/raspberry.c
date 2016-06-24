@@ -7,11 +7,20 @@
 #include "Gen_UKF.h"
 #include <inttypes.h>
 #include <stdint.h>
+#include <time.h>
 /*--------------------------------------Global variables---------------------------------------*/
 #define VAL_DEFAULT -100000.42					//Default valeur for old data
-FILE * fp;
-int ID_AC;
+FILE * file_logger =NULL;
+int ID_AC;										//Get the id of the ac in the ivy msg
+char msg_begin_log_file[90]="Raspi Wind Estimator log file\nDate receive and Data calculated\nStart at :  %s";//header of log file
+int id_ac_log_file=0;							//chekc if header is in log file
 /*---------------------------------------------------------------------------------------------*/
+/*-----------------add_separator----------------------*/
+/*  Add separator to the log file                     */
+/*----------------------------------------------------*/
+void add_separator(){
+	fprintf(file_logger, "----------------------------------------\n");
+}
 /*---------add_data_to_ivy_string_UINT8---------------*/
 /*  Add a data to the char* full_data                 */
 /*    char* full_data: char* where the var will be add*/
@@ -59,7 +68,7 @@ void send_wind_estimation(){
     char *full_data = (char *) malloc(sizeof(array)*NBR_DATA_SEND_BACK); //Chaine of char will containe the all data
     
 	/*The First data is a copy*/ 
-	add_data_to_ivy_string_UINT8(full_data,ID_AC,0);
+	add_data_to_ivy_string_UINT8(full_data,ID_AC,1);
 	/*The Second data is a copy*/ 
    add_data_to_ivy_string_UINT8(full_data,3,0);
    /*The Third data is a copy*/ 
@@ -69,23 +78,25 @@ void send_wind_estimation(){
 	/*North : Xout 3*/
     add_data_to_ivy_string_FLOAT(full_data,Answer_State.storage_tab_float[3],0);
     /*The Fifth data*/
-	/*Down : Xout 0*/
-	add_data_to_ivy_string_FLOAT(full_data,Answer_State.storage_tab_float[0],0);
+	/*Down : Xout 5*/
+	add_data_to_ivy_string_FLOAT(full_data,Answer_State.storage_tab_float[5],0);
 	/*The last data*/
-	/*Down : Xout 6*/
-	add_data_to_ivy_string_FLOAT(full_data,Answer_State.storage_tab_float[5],1);
+	/*Vair : Xout 0*/
+	add_data_to_ivy_string_FLOAT(full_data,Answer_State.storage_tab_float[0],0);
 	
 	/*Send data to ivy*/
 	
 	IvySendMsg("Wind_estimator WIND_INFO %s", full_data);
 	/*reset some param for the new step*/
-    printf("\nDATA\n");
-    fprintf(fp, "DATA_GEN_UKF:\n");
+    fprintf(file_logger, "DATA_GEN_UKF:\n");
     for(i =0;i<6;i++){
-		printf("%f\n",Answer_State.storage_tab_float[i]);
-		fprintf(fp, "%f\n", Answer_State.storage_tab_float[i]);
+		fprintf(file_logger, "%f\n", Answer_State.storage_tab_float[i]);
 	}
-    fflush(fp);
+	prinft("Send data back\n");
+	add_separator();
+	add_separator();
+	add_separator();
+    fflush(file_logger);
     free(full_data);
 }
 /*--------------send_error----------------------------*/
@@ -150,13 +161,38 @@ void get_wind(){
 		j++;
 	}
 }
+/*------------------open_file_log---------------------*/
+/* Open a log file, creat a differeent file for each  */
+/*   start of the programme 						  */						
+/*----------------------------------------------------*/
+void open_file_log(){
+  uint32_t counter = 0;
+  char filename[512];
+  time_t rawtime;
+  struct tm * timeinfo;
+
+  // Check for available files
+  sprintf(filename, "%s%d", NAME_FILE, counter);
+  while ((file_logger = fopen(filename, "r"))) {
+    fclose(file_logger);
+    counter++;
+    sprintf(filename, "%s%d", NAME_FILE, counter);
+  }
+
+  file_logger = fopen(filename, "w+");
+  if (file_logger != NULL) {
+	  time ( &rawtime );
+      timeinfo = localtime ( &rawtime );
+	fprintf(file_logger, msg_begin_log_file, asctime(timeinfo));
+  }
+}
 /*----------------------init--------------------------*/
 /* Init fonction to init different type of variable   */	
 /*  for the calculator before to calculate  		  */					
 /*----------------------------------------------------*/
 void init(){
 	
-	fp = fopen (NAME_FILE, "w+");
+	open_file_log();
 	
 	Gen_UKF_initialize();
 	
@@ -310,20 +346,25 @@ static void parse_check_message(IvyClientPtr app, void *user_data, int argc, cha
 	int i=0;
 	const char s[2] = ",";
 	char *token;
-    
     ID_AC = atoi(argv[0]);
-   
+    
+    if(id_ac_log_file!=1){
+		fprintf(file_logger, "ID_AC:  %d\n", ID_AC);
+		add_separator();
+		add_separator();
+		id_ac_log_file=1;
+	}
 	token = strtok(argv[1], s);
-    fprintf(fp, "DATA_RECEIVE:\n");
+	
+    fprintf(file_logger, "DATA_RECEIVE:\n");
 	while( (token != NULL) && (i<NBR_DATA)) 
 	{
-		printf( " %s\n", token );
 		Data_State.storage_tab_float[i]=(float)atof(token);
-		fprintf(fp, "%f\n", Data_State.storage_tab_float[i]);
+		fprintf(file_logger, "%f\n", Data_State.storage_tab_float[i]);
 		token = strtok(NULL, s);
 		i++;
 	}
-	fflush(fp);
+	fflush(file_logger);
 	if(i<=(NBR_DATA)){
 		parse_data_for_wind_estimation();
 		send_wind_estimation();
