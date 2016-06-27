@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2015 Felix Ruess <felix.ruess@gmail.com>
+ * Copyright (C) Roland Meertens
  *
- * This file is part of paparazzi.
+ * This file is part of paparazzi
  *
  * paparazzi is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,23 +14,28 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Paparazzi; see the file COPYING.  If not, see
+ * along with paparazzi; see the file COPYING.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
-
 /**
- * @file subsystems/ins/ins_gps_passthrough_utm.h
- *
- * Simply passes GPS UTM position and velocity through to the state interface.
- * For fixedwing firmware since it sets UTM pos only.
+ * @file "modules/pose_history/pose_history.h"
+ * @author Roland Meertens
+ * Ask this module for the pose the drone had closest to a given timestamp
  */
 
-#ifndef INS_GPS_PASSTHROUGH_UTM_H
-#define INS_GPS_PASSTHROUGH_UTM_H
+#ifndef POSE_HISTORY_H
+#define POSE_HISTORY_H
 
-#define DefaultInsImpl ins_gps_utm
+#include "math/pprz_algebra_float.h"
 
-extern void ins_gps_utm_init(void);
-extern void ins_gps_utm_register(void);
+struct pose_t {
+  uint32_t timestamp;
+  struct FloatEulers eulers;
+  struct FloatRates rates;
+};
 
-#endif /* INS_GPS_PASSTHROUGH_UTM_H */
+extern void pose_init(void);
+extern void pose_periodic(void);
+extern struct pose_t get_rotation_at_timestamp(uint32_t timestamp);
+#endif
+
