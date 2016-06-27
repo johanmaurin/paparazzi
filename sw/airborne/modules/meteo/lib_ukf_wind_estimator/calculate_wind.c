@@ -1,8 +1,6 @@
-#include <glib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "calculate_wind.h"
-#include "Gen_UKF.h"
 #include <inttypes.h>
 #include <stdint.h>
 
@@ -40,11 +38,10 @@ void parse_data_for_wind_estimation(void){
 /* Fonction will get the out's calcul in the structure*/						
 /*----------------------------------------------------*/
 void get_wind(void){
-	int i =0;
 	int j;
 	
 	j=0;
-	for(i=i;i<size_of_answer[0];i++){
+	for(int i=0;i<NBR_ANSWER;i++){
 		Answer_State.storage_tab_float[i] = (float)Gen_UKF_Y.xout[j];
 		j++;
 	}

@@ -85,7 +85,7 @@ static void thd_windestimate(void *arg)
 		  chThdSleepMilliseconds(time_to_wait*1000);
 	  }
 	  
-	  chThdWaitUntil();
+	  //chThdWaitUntil();
   }
 }
 
