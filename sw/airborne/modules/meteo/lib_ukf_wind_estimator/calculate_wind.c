@@ -14,46 +14,46 @@ void parse_data_for_wind_estimation(void){
 	/*Put data in OmegaA*/
 	j=0;
 	for(i=0;i<6;i++){
-		Gen_UKF_U.omegaa[i]=Data_State.storage_tab_float[j];
+		Gen_UKF_U.omegaa[i]=Data_State_Wind.storage_tab_float[j];
 		j++;
 	}
 	/*Put data in Zk*/
 	for(i=0;i<5;i++){
-		Gen_UKF_U.zk[i]=Data_State.storage_tab_float[j];
+		Gen_UKF_U.zk[i]=Data_State_Wind.storage_tab_float[j];
 		j++;
 	}
 	/*Put data in Q (the quaterion)*/	
 	for(i=0;i<4;i++){
-		Gen_UKF_U.q[i]=Data_State.storage_tab_float[j];
+		Gen_UKF_U.q[i]=Data_State_Wind.storage_tab_float[j];
 		j++;
 	}
 	/*Put data in Phi*/	
-	Gen_UKF_U.phi = Data_State.storage_tab_float[i];
+	Gen_UKF_U.phi = Data_State_Wind.storage_tab_float[i];
 	i++;
 	/*Put data in Alpha*/	
-	Gen_UKF_U.theta = Data_State.storage_tab_float[i];
+	Gen_UKF_U.theta = Data_State_Wind.storage_tab_float[i];
 	Gen_UKF_step();
 }
-/*------------------get_wind--------------------------*/
+/*-------get_wind_from_wind_estimation----------------*/
 /* Fonction will get the out's calcul in the structure*/						
 /*----------------------------------------------------*/
-void get_wind(void){
+void get_wind_from_wind_estimation(void){
 	int j;
 	
 	j=0;
 	for(int i=0;i<NBR_ANSWER;i++){
-		Answer_State.storage_tab_float[i] = (float)Gen_UKF_Y.xout[j];
+		Answer_State_Wind.storage_tab_float[i] = (float)Gen_UKF_Y.xout[j];
 		j++;
 	}
 }
-/*----------------------init--------------------------*/
+/*----------------init_calculator---------------------*/
 /* Init fonction to init different type of variable   */	
 /*  for the calculator before to calculate  		  */					
 /*----------------------------------------------------*/
 void init_calculator(void){
 	
 	Gen_UKF_initialize();
-	
+		
 	Gen_UKF_U.R[0]=pow(1.5,2);
 	Gen_UKF_U.R[1]=0;
 	Gen_UKF_U.R[2]=0;

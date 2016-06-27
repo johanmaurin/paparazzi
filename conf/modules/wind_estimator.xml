@@ -13,6 +13,8 @@
     <file name="lib_ukf_wind_estimator/rtwtypes.h"/>
   </header>
    <init fun="wind_estimator_init()"/>
+   <periodic fun="get_data_from_state()" freq="50."  autorun="LOCK"/>
+    <event fun="put_data_to_State()"/>
   <makefile>
     <file name="wind_estimator.c"/>
     <file name="lib_ukf_wind_estimator/calculate_wind.c"/>

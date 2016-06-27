@@ -86,7 +86,7 @@ struct tag_RTM_Gen_UKF_T {
 };
 
 /* Block parameters (auto storage) */
-P_Gen_UKF_T Gen_UKF_P;
+extern P_Gen_UKF_T Gen_UKF_P;
 
 /* Block states (auto storage) */
 extern DW_Gen_UKF_T Gen_UKF_DW;

@@ -9,12 +9,12 @@
 #define NBR_DATA 17		  //Number of data to recive
 #define NBR_ANSWER 6	  //Number of data to answer
 /*Structur of the data to storage before to calcul*/
-struct Data_struc{
+struct Data_struc_Wind{
 	struct FloatRates omega;
 /*	float  omegaa_p;
 	float  omegaa_q;
 	float  omegaa_r;*/
-	struct EcefCoor_f omega_A;
+	struct  NedCoor_f omega_A;
 /*	float  omegaa_Ax;
 	float  omegaa_Ay;
 	float  omegaa_Az;*/
@@ -33,13 +33,13 @@ struct Data_struc{
 	float  theta;
 };
 /*--------------Union to convert the Structure to a float array----------*/
-union Data_State{
-	struct Data_struc storage;
+union Data_State_Wind{
+	struct Data_struc_Wind storage;
 	float storage_tab_float[NBR_DATA];
 };
-extern union Data_State Data_State;
+extern union Data_State_Wind Data_State_Wind;
 /*Structur of the data to recive from the calcul*/
-struct Answer_storage{
+struct Answer_storage_Wind{
   float xout_1;
   float xout_2;
   float xout_3;
@@ -48,14 +48,14 @@ struct Answer_storage{
   float xout_6;                   
 };
 /*Union to generate a array of float link to the data to send*/
-union Answer_State{
-	struct Answer_storage storage;
+union Answer_State_Wind{
+	struct Answer_storage_Wind storage;
 	float storage_tab_float[NBR_ANSWER];
 };
-extern union Answer_State Answer_State;
+extern union Answer_State_Wind Answer_State_Wind;
 
 extern void parse_data_for_wind_estimation(void);
-extern void get_wind(void);
+extern void get_wind_from_wind_estimation(void);
 extern void init_calculator(void);
 
 #endif
