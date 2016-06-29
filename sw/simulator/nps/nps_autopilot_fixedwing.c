@@ -144,6 +144,18 @@ void nps_autopilot_run_step(double time)
     Fbw(event_task);
     Ap(event_task);
   }
+  
+  if (nps_sensors_AOA_available()) {
+     stateSetAngleOfAttack_f((float)sensors.AOA.value);
+    Fbw(event_task);
+    Ap(event_task);
+  }
+  
+  if (nps_sensors_SideSlip_available()) {
+     stateSetSideslip_f((float)sensors.sideslip.value);
+    Fbw(event_task);
+    Ap(event_task);
+  }
 
   if (nps_bypass_ahrs) {
     sim_overwrite_ahrs();

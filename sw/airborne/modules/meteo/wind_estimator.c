@@ -10,7 +10,7 @@
  * Wind Estimator
  */
 #include "std.h"
-//#include "ff.h"
+#include "ff.h"
 #include "pprzlink/pprzlink_device.h"
 #include "state.h"
 #include <ch.h>
@@ -72,7 +72,6 @@ void get_data_from_state(void){
 	Data_struc_State.storage.q = *stateGetNedToBodyQuat_f();
 	Data_struc_State.storage.phi = stateGetNedToBodyEulers_f()->phi; //rad
 	Data_struc_State.storage.theta = stateGetNedToBodyEulers_f()->theta; //rad
-	
 	chMtxUnlock(&read_state_mtx);
 }
 /*---------put_data_from_wind_estimator_to_state------*/
@@ -100,8 +99,8 @@ void put_data_to_State(void){
 	if(data_to_State==1){
 		chMtxLock(&write_state_mtx);
 		
-		NE_f.x = Answer_State_State.storage_tab_float[3];
-		NE_f.y = Answer_State_State.storage_tab_float[4];
+		NE_Wind_f.x = Answer_State_State.storage_tab_float[3];
+		NE_Wind_f.y = Answer_State_State.storage_tab_float[4];
 		
 		stateSetAirspeed_f(Answer_State_State.storage_tab_float[0]);			//NEED CHECK
 		stateSetHorizontalWindspeed_f(&NE_Wind_f);								//NEED CHECK

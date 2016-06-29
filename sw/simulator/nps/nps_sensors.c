@@ -20,7 +20,8 @@ void nps_sensors_init(double time)
   nps_sensor_sonar_init(&sensors.sonar, time);
   nps_sensor_airspeed_init(&sensors.airspeed, time);
   nps_sensor_temperature_init(&sensors.temp, time);
-
+  nps_sensor_AOA_init(&sensors.AOA, time);
+  nps_sensor_sideslip_init(&sensors.sideslip,time);
 }
 
 
@@ -34,6 +35,8 @@ void nps_sensors_run_step(double time)
   nps_sensor_sonar_run_step(&sensors.sonar, time);
   nps_sensor_airspeed_run_step(&sensors.airspeed, time);
   nps_sensor_temperature_run_step(&sensors.temp, time);
+  nps_sensor_AOA_run_step(&sensors.AOA, time);
+  nps_sensor_sideslip_run_step(&sensors.sideslip,time);
 }
 
 
@@ -95,6 +98,24 @@ bool nps_sensors_temperature_available(void)
 {
   if (sensors.temp.data_available) {
     sensors.temp.data_available = FALSE;
+    return TRUE;
+  }
+  return FALSE;
+}
+
+bool nps_sensors_AOA_available(void)
+{
+  if (sensors.AOA.data_available) {
+    sensors.AOA.data_available = FALSE;
+    return TRUE;
+  }
+  return FALSE;
+}
+
+bool nps_sensors_SideSlip_available(void)
+{
+  if (sensors.sideslip.data_available) {
+    sensors.sideslip.data_available = FALSE;
     return TRUE;
   }
   return FALSE;

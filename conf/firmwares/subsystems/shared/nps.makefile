@@ -37,6 +37,8 @@ nps.srcs += $(NPSDIR)/nps_main.c                 \
        $(NPSDIR)/nps_sensor_gps.c                \
        $(NPSDIR)/nps_sensor_airspeed.c           \
        $(NPSDIR)/nps_sensor_temperature.c        \
+       $(NPSDIR)/nps_sensor_AOA.c                \
+       $(NPSDIR)/nps_sensor_sideslip.c           \
        $(NPSDIR)/nps_electrical.c                \
        $(NPSDIR)/nps_atmosphere.c                \
        $(NPSDIR)/nps_radio_control.c             \

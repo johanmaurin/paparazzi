@@ -8,12 +8,14 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <time.h>
+#include <math.h>
 /*--------------------------------------Global variables---------------------------------------*/
 #define VAL_DEFAULT -100000.42					//Default valeur for old data
 FILE * file_logger =NULL;
 int ID_AC;										//Get the id of the ac in the ivy msg
 char msg_begin_log_file[90]="Raspi Wind Estimator log file\nDate receive and Data calculated\nStart at :  %s";//header of log file
 int id_ac_log_file=0;							//chekc if header is in log file
+float norme_wind;
 /*---------------------------------------------------------------------------------------------*/
 /*-----------------add_separator----------------------*/
 /*  Add separator to the log file                     */
@@ -29,7 +31,7 @@ void add_separator(){
 /*----------------------------------------------------*/
 void add_data_to_ivy_string_UINT8( char * full_data, int var,int first){
 	
-	char array[10];
+	char array[100];
 	sprintf(array, "%d",(uint8_t)var);
 	strcat(array, " ");
     if(first==1){
@@ -46,7 +48,7 @@ void add_data_to_ivy_string_UINT8( char * full_data, int var,int first){
 /*----------------------------------------------------*/
 void add_data_to_ivy_string_FLOAT( char * full_data, float var,int first){
 	
-	char array[10];
+	char array[100];
 	sprintf(array, "%f",(float)var);
 	strcat(array, " ");
 	if(first==1){
@@ -60,15 +62,15 @@ void add_data_to_ivy_string_FLOAT( char * full_data, float var,int first){
 /*    This fonction change the float array to a chaine*/
 /*          of char									  */
 /*----------------------------------------------------*/
-void send_wind_estimation(){
-	          
+void send_wind_estimation(){      
 	int i; 
 	get_wind();  
 	char array[10];                            //array will containe the different float value
     char *full_data = (char *) malloc(sizeof(array)*NBR_DATA_SEND_BACK); //Chaine of char will containe the all data
-    
+   
 	/*The First data is a copy*/ 
 	add_data_to_ivy_string_UINT8(full_data,ID_AC,1);
+	
 	/*The Second data is a copy*/ 
    add_data_to_ivy_string_UINT8(full_data,3,0);
    /*The Third data is a copy*/ 
@@ -81,18 +83,21 @@ void send_wind_estimation(){
 	/*Down : Xout 5*/
 	add_data_to_ivy_string_FLOAT(full_data,Answer_State.storage_tab_float[5],0);
 	/*The last data*/
-	/*Vair : Xout 0*/
+	/*Vair : Xout 0*/ 
 	add_data_to_ivy_string_FLOAT(full_data,Answer_State.storage_tab_float[0],0);
-	
 	/*Send data to ivy*/
-	
 	IvySendMsg("Wind_estimator WIND_INFO %s", full_data);
 	/*reset some param for the new step*/
     fprintf(file_logger, "DATA_GEN_UKF:\n");
+    printf("DATA_GEN_UKF:\n");
     for(i =0;i<6;i++){
-		fprintf(file_logger, "%f\n", Answer_State.storage_tab_float[i]);
+		fprintf(file_logger, "%s : %f\n",name_data_send_back[i],Answer_State.storage_tab_float[i]);
+		printf("%s : %f\n",name_data_send_back[i], Answer_State.storage_tab_float[i]);
 	}
-	prinft("Send data back\n");
+	norme_wind =(float)sqrt( pow((double)Answer_State.storage_tab_float[3],2)+pow((double)Answer_State.storage_tab_float[5],2)+pow((double)Answer_State.storage_tab_float[4],2));
+	fprintf(file_logger, "Norme Wind : %f\n",norme_wind);
+	printf("Norme Wind : %f\n",norme_wind);
+	printf("Send data back\n");
 	add_separator();
 	add_separator();
 	add_separator();
@@ -355,12 +360,13 @@ static void parse_check_message(IvyClientPtr app, void *user_data, int argc, cha
 		id_ac_log_file=1;
 	}
 	token = strtok(argv[1], s);
-	
+	printf("DATA_RECEIVE:\n");
     fprintf(file_logger, "DATA_RECEIVE:\n");
 	while( (token != NULL) && (i<NBR_DATA)) 
 	{
 		Data_State.storage_tab_float[i]=(float)atof(token);
-		fprintf(file_logger, "%f\n", Data_State.storage_tab_float[i]);
+		fprintf(file_logger,"%s : %f\n",name_data_receive[i], Data_State.storage_tab_float[i]);
+		printf("%s : %f\n",name_data_receive[i], Data_State.storage_tab_float[i]);
 		token = strtok(NULL, s);
 		i++;
 	}

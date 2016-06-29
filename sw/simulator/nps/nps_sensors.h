@@ -10,6 +10,8 @@
 #include "nps_sensor_sonar.h"
 #include "nps_sensor_airspeed.h"
 #include "nps_sensor_temperature.h"
+#include "nps_sensor_AOA.h"
+#include "nps_sensor_sideslip.h"
 
 struct NpsSensors {
   struct DoubleRMat body_to_imu_rmat;
@@ -21,6 +23,8 @@ struct NpsSensors {
   struct NpsSensorSonar sonar;
   struct NpsSensorAirspeed airspeed;
   struct NpsSensorTemperature temp;
+  struct NpsSensorAOA AOA;
+  struct NpsSensorSideSlip sideslip;
 };
 
 extern struct NpsSensors sensors;
@@ -35,6 +39,7 @@ extern bool nps_sensors_gps_available();
 extern bool nps_sensors_sonar_available();
 extern bool nps_sensors_airspeed_available();
 extern bool nps_sensors_temperature_available();
-
+extern bool nps_sensors_AOA_available();
+extern bool nps_sensors_SideSlip_available();
 
 #endif /* NPS_SENSORS_H */

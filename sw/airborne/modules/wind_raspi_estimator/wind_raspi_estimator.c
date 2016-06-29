@@ -53,7 +53,7 @@ void get_data_from_state(void){
 	Data_State.storage.omega = *stateGetBodyRates_f(); //   rad/s
 	Data_State.storage.omega_A = *stateGetAccelNed_f(); //   m/s^2
 	Data_State.storage.Zk_V = *stateGetSpeedNed_f(); //    m/s
-	Data_State.storage.Zk_Va =  stateGetAirspeed_f()*cos(stateGetAngleOfAttack_f());    //    m/s  // projection de la norme qur l'axe X (cos sin)
+	Data_State.storage.Zk_Va =  stateGetAirspeed_f()*cos(stateGetAngleOfAttack_f())*cos(stateGetSideslip_f());    //    m/s  // projection de la norme qur l'axe X (cos sin)
 	Data_State.storage.Zk_AOA = stateGetAngleOfAttack_f();   // rad.
 	Data_State.storage.q = *stateGetNedToBodyQuat_f();
 	Data_State.storage.phi = stateGetNedToBodyEulers_f()->phi; //rad

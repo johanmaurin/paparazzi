@@ -10,16 +10,38 @@
 #define NBR_DATA_SEND_BACK 6
 #define NAME_FILE "Log_file_data_"
 
-/*---------------------size_of_data--------------------------------*/
-/*Array of int to precise the size of the different type of data   */
-/* (ther place in the chaine of data than the program will recive) */
+/*-----------------------name_data_receive-------------------------*/
+/*  Different name of input  data from the calculator              */
 /*-----------------------------------------------------------------*/
-int size_of_data[NBR_DIFF_DATA]={
-6,
-5,
-4,
-1,
-1
+char* name_data_receive[NBR_DATA]={
+	"omegaa_p ",
+	"omegaa_q ",
+	"omegaa_r ",
+	"omegaa_Ax",
+	"omegaa_Ay",
+	"omegaa_Az",
+	"Zk_vx    ",
+	"Zk_vy    ",
+	"Zk_vz    ",
+	"Zk_Va    ",
+	"Zk_AOA   ",
+	"q1       ",
+	"q2       ",
+	"q3       ",
+	"q4       ",
+	"phi      ",
+	"theta    "
+};
+/*-----------------------name_data_send_back-----------------------*/
+/*  Different name of output data from the calculator              */
+/*-----------------------------------------------------------------*/
+char* name_data_send_back[NBR_DATA_SEND_BACK]={
+	"Airspeed",
+	"Vk      ",
+	"Wk      ",
+	"East    ",
+	"North   ",
+	"Down    "
 };
 /*-----------------------size_of_answer----------------------------*/
 /*Array of int to precise the size of the different type of data   */
