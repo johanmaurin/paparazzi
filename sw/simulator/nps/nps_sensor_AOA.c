@@ -42,7 +42,7 @@
 
 /// standard deviation in radian (default 0.1 rad)
 #ifndef NPS_AOA_NOISE_STD_DEV
-#define NPS_AOA_NOISE_STD_DEV 0.0001
+#define NPS_AOA_NOISE_STD_DEV 0.001
 #endif
 
 #ifndef NPS_AOA_OFFSET

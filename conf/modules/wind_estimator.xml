@@ -12,7 +12,6 @@
   <event fun="put_data_to_State()"/>
   <makefile>
     <file name="wind_estimator.c"/>
-    <file name="lib_ukf_wind_estimator/calculate_wind.c"/>
     <file name="lib_ukf_wind_estimator/Gen_UKF.c"/>
     <file name="lib_ukf_wind_estimator/Gen_UKF_data.c"/>
   </makefile>

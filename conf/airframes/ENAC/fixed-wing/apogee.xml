@@ -61,11 +61,11 @@
     <!-- Sensors -->
     <module name="gps" type="ublox"/>
 
-    <!--module name="wind_raspi_estimator"/-->
+    <module name="wind_raspi_estimator"/>
     <define name="USE_NPS_AIRSPEED"/>
     <define name="USE_NPS_SLIDESPEED"/>
     <define name="USE_NPS_AOA"/>
-    <module name="wind_estimator"/>
+    <!--module name="wind_estimator"/-->
 
     <!--module name="spi_master"/-->
     <!-- <module name="mcp355x"> -->
