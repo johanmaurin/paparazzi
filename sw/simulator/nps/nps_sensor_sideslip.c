@@ -76,6 +76,10 @@ void nps_sensor_sideslip_run_step(struct NpsSensorSideSlip *sideslip, double tim
   if( M_PI < sideslip->value){
 	  sideslip->value =0;
   }
+  
+  if( -M_PI > sideslip->value){
+	  sideslip->value =0;
+  }
 
   sideslip->next_update += NPS_SIDESLIP_DT;
   sideslip->data_available = TRUE;

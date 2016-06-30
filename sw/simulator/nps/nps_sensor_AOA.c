@@ -75,6 +75,9 @@ void nps_sensor_AOA_run_step(struct NpsSensorAOA *AOA, double time)
   if( M_PI < AOA->value){
 	  AOA->value =0;
   }	
+  if( -M_PI > AOA->value){
+	  AOA->value =0;
+  }
 
   AOA->next_update += NPS_AOA_DT;
   AOA->data_available = TRUE;
