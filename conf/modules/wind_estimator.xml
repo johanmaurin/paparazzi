@@ -6,20 +6,15 @@
   </doc>
   <header>
     <file name="wind_estimator.h"/>
-    <file name="lib_ukf_wind_estimator/calculate_wind.h"/>
-    <file name="lib_ukf_wind_estimator/Gen_UKF.h"/>
-    <file name="lib_ukf_wind_estimator/Gen_UKF_private.h"/>
-    <file name="lib_ukf_wind_estimator/Gen_UKF_types.h"/>
-    <file name="lib_ukf_wind_estimator/rtwtypes.h"/>
   </header>
-   <init fun="wind_estimator_init()"/>
-   <periodic fun="get_data_from_state()" freq="50."  autorun="LOCK"/>
-    <event fun="put_data_to_State()"/>
+  <init fun="wind_estimator_init()"/>
+  <periodic fun="get_data_from_state()" freq="10."  autorun="TRUE"/>
+  <event fun="put_data_to_State()"/>
   <makefile>
     <file name="wind_estimator.c"/>
     <file name="lib_ukf_wind_estimator/calculate_wind.c"/>
-	<file name="lib_ukf_wind_estimator/Gen_UKF.c"/>
-	<file name="lib_ukf_wind_estimator/Gen_UKF_data.c"/>
+    <file name="lib_ukf_wind_estimator/Gen_UKF.c"/>
+    <file name="lib_ukf_wind_estimator/Gen_UKF_data.c"/>
   </makefile>
 </module>
 
