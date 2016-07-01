@@ -86,7 +86,7 @@ void get_wind_from_wind_estimation(void){
 	
 	j=0;
 	for(int i=0;i<NBR_ANSWER;i++){
-		Answer_State_Wind.storage_tab_float[i] = (float)Gen_UKF_Y.xout[j];
+		Answer_State_Wind.storage_tab_float[i] = (float)ExtY.xout[j];
 		j++;
 	}
 }
@@ -100,26 +100,26 @@ void parse_data_for_wind_estimation(void){
 	/*Put data in OmegaA*/
 	j=0;
 	for(i=0;i<6;i++){
-		Gen_UKF_U.omegaa[i]=Data_State_Wind.storage_tab_float[j];
+		ExtU.omegaa[i]=Data_State_Wind.storage_tab_float[j];
 		j++;
 	}
 	/*Put data in Zk*/
 	for(i=0;i<5;i++){
-		Gen_UKF_U.zk[i]=Data_State_Wind.storage_tab_float[j];
+		ExtU.zk[i]=Data_State_Wind.storage_tab_float[j];
 		j++;
 	}
 	/*Put data in Q (the quaterion)*/	
 	for(i=0;i<4;i++){
-		Gen_UKF_U.q[i]=Data_State_Wind.storage_tab_float[j];
+		ExtU.q[i]=Data_State_Wind.storage_tab_float[j];
 		j++;
 	}
 	/*Put data in Phi*/	
-	Gen_UKF_U.phi = Data_State_Wind.storage_tab_float[i];
+	ExtU.phi = Data_State_Wind.storage_tab_float[i];
 	i++;
 	/*Put data in Alpha*/	
-	Gen_UKF_U.theta = Data_State_Wind.storage_tab_float[i];
+	ExtU.theta = Data_State_Wind.storage_tab_float[i];
 	
-	Gen_UKF_U.dt=time_calculator_dt;
+	ExtU.dt=time_calculator_dt;
 }
 /*------------------thd_windestimate------------------*/
 /*  Thread fonction                      	 		  */
@@ -160,145 +160,145 @@ void init_calculator(void){
 	
 	Gen_UKF_initialize();
 		
-	Gen_UKF_U.R[0]=pow(1.5,2);
-	Gen_UKF_U.R[1]=0;
-	Gen_UKF_U.R[2]=0;
-	Gen_UKF_U.R[3]=0;
-	Gen_UKF_U.R[4]=0;
+	ExtU.R[0]=pow(1.5,2);
+	ExtU.R[1]=0;
+	ExtU.R[2]=0;
+	ExtU.R[3]=0;
+	ExtU.R[4]=0;
 	
-	Gen_UKF_U.R[5]=0;
-	Gen_UKF_U.R[6]=pow(1.5,2);
-	Gen_UKF_U.R[7]=0;
-	Gen_UKF_U.R[8]=0;
-	Gen_UKF_U.R[9]=0;
+	ExtU.R[5]=0;
+	ExtU.R[6]=pow(1.5,2);
+	ExtU.R[7]=0;
+	ExtU.R[8]=0;
+	ExtU.R[9]=0;
 	
-	Gen_UKF_U.R[10]=0;
-	Gen_UKF_U.R[11]=0;
-	Gen_UKF_U.R[12]=pow(1.5,2);
-	Gen_UKF_U.R[13]=0;
-	Gen_UKF_U.R[14]=0;
+	ExtU.R[10]=0;
+	ExtU.R[11]=0;
+	ExtU.R[12]=pow(1.5,2);
+	ExtU.R[13]=0;
+	ExtU.R[14]=0;
 	
-	Gen_UKF_U.R[15]=0;
-	Gen_UKF_U.R[16]=0;
-	Gen_UKF_U.R[17]=0;
-	Gen_UKF_U.R[18]=pow(0.1,2);
-	Gen_UKF_U.R[19]=0;
+	ExtU.R[15]=0;
+	ExtU.R[16]=0;
+	ExtU.R[17]=0;
+	ExtU.R[18]=pow(0.1,2);
+	ExtU.R[19]=0;
 	
-	Gen_UKF_U.R[20]=0;
-	Gen_UKF_U.R[21]=0;
-	Gen_UKF_U.R[22]=0;
-	Gen_UKF_U.R[23]=0;
-	Gen_UKF_U.R[2]=pow(0.001,2);
+	ExtU.R[20]=0;
+	ExtU.R[21]=0;
+	ExtU.R[22]=0;
+	ExtU.R[23]=0;
+	ExtU.R[2]=pow(0.001,2);
 	
 	/*-------------------*/
 	
-	Gen_UKF_U.Q[0]=pow(0.01,2);
-	Gen_UKF_U.Q[1]=0;
-	Gen_UKF_U.Q[2]=0;
-	Gen_UKF_U.Q[3]=0;
-	Gen_UKF_U.Q[4]=0;
-	Gen_UKF_U.Q[5]=0;
+	ExtU.Q[0]=pow(0.01,2);
+	ExtU.Q[1]=0;
+	ExtU.Q[2]=0;
+	ExtU.Q[3]=0;
+	ExtU.Q[4]=0;
+	ExtU.Q[5]=0;
 	
-	Gen_UKF_U.Q[6]=0;
-	Gen_UKF_U.Q[7]=pow(0.01,2);
-	Gen_UKF_U.Q[8]=0;
-	Gen_UKF_U.Q[9]=0;
-	Gen_UKF_U.Q[10]=0;
-	Gen_UKF_U.Q[11]=0;
+	ExtU.Q[6]=0;
+	ExtU.Q[7]=pow(0.01,2);
+	ExtU.Q[8]=0;
+	ExtU.Q[9]=0;
+	ExtU.Q[10]=0;
+	ExtU.Q[11]=0;
 	
-	Gen_UKF_U.Q[12]=0;
-	Gen_UKF_U.Q[13]=0;
-	Gen_UKF_U.Q[14]=pow(0.01,2);
-	Gen_UKF_U.Q[15]=0;
-	Gen_UKF_U.Q[16]=0;
-	Gen_UKF_U.Q[17]=0;
+	ExtU.Q[12]=0;
+	ExtU.Q[13]=0;
+	ExtU.Q[14]=pow(0.01,2);
+	ExtU.Q[15]=0;
+	ExtU.Q[16]=0;
+	ExtU.Q[17]=0;
 	
-	Gen_UKF_U.Q[18]=0;
-	Gen_UKF_U.Q[19]=0;
-	Gen_UKF_U.Q[20]=0;
-	Gen_UKF_U.Q[21]=0.1;
-	Gen_UKF_U.Q[22]=0;
-	Gen_UKF_U.Q[23]=0;
+	ExtU.Q[18]=0;
+	ExtU.Q[19]=0;
+	ExtU.Q[20]=0;
+	ExtU.Q[21]=0.1;
+	ExtU.Q[22]=0;
+	ExtU.Q[23]=0;
 
-	Gen_UKF_U.Q[24]=0;
-	Gen_UKF_U.Q[25]=0;
-	Gen_UKF_U.Q[26]=0;
-	Gen_UKF_U.Q[27]=0;
-	Gen_UKF_U.Q[28]=0.1;
-	Gen_UKF_U.Q[29]=0;
+	ExtU.Q[24]=0;
+	ExtU.Q[25]=0;
+	ExtU.Q[26]=0;
+	ExtU.Q[27]=0;
+	ExtU.Q[28]=0.1;
+	ExtU.Q[29]=0;
 	
-	Gen_UKF_U.Q[30]=0;
-	Gen_UKF_U.Q[31]=0;
-	Gen_UKF_U.Q[32]=0;
-	Gen_UKF_U.Q[33]=0;
-	Gen_UKF_U.Q[34]=0;
-	Gen_UKF_U.Q[35]=0.01;
+	ExtU.Q[30]=0;
+	ExtU.Q[31]=0;
+	ExtU.Q[32]=0;
+	ExtU.Q[33]=0;
+	ExtU.Q[34]=0;
+	ExtU.Q[35]=0.01;
 	
 	/*------------------*/
 	
 	
-	Gen_UKF_U.alpha =0.5;
+	ExtU.alpha =0.5;
 	
-	Gen_UKF_U.ki=0;
+	ExtU.ki=0;
 	
-	Gen_UKF_U.beta = 2;
+	ExtU.beta = 2;
 	
-	Gen_UKF_U.dt=0.02;
+	ExtU.dt=0.02;
 	
 	
 	/*---------*/
 	
 	
-	Gen_UKF_U.x0[0] = 0;
-	Gen_UKF_U.x0[1] = 0;
-	Gen_UKF_U.x0[2] = 0;
-	Gen_UKF_U.x0[3] = 0;
-	Gen_UKF_U.x0[4] = 0;
-	Gen_UKF_U.x0[5] = 0;
+	ExtU.x0[0] = 0;
+	ExtU.x0[1] = 0;
+	ExtU.x0[2] = 0;
+	ExtU.x0[3] = 0;
+	ExtU.x0[4] = 0;
+	ExtU.x0[5] = 0;
 	
 	/*--------------------*/
 	
-	Gen_UKF_U.P[0]=0.2;
-	Gen_UKF_U.P[1]=0;
-	Gen_UKF_U.P[2]=0;
-	Gen_UKF_U.P[3]=0;
-	Gen_UKF_U.P[4]=0;
-	Gen_UKF_U.P[5]=0;
+	ExtU.P_i[0]=0.2;
+	ExtU.P_i[1]=0;
+	ExtU.P_i[2]=0;
+	ExtU.P_i[3]=0;
+	ExtU.P_i[4]=0;
+	ExtU.P_i[5]=0;
 	
-	Gen_UKF_U.P[6]=0;
-	Gen_UKF_U.P[7]=0.2;
-	Gen_UKF_U.P[8]=0;
-	Gen_UKF_U.P[9]=0;
-	Gen_UKF_U.P[10]=0;
-	Gen_UKF_U.P[11]=0;
+	ExtU.P_i[6]=0;
+	ExtU.P_i[7]=0.2;
+	ExtU.P_i[8]=0;
+	ExtU.P_i[9]=0;
+	ExtU.P_i[10]=0;
+	ExtU.P_i[11]=0;
 	
-	Gen_UKF_U.P[12]=0;
-	Gen_UKF_U.P[13]=0;
-	Gen_UKF_U.P[14]=0.2;
-	Gen_UKF_U.P[15]=0;
-	Gen_UKF_U.P[16]=0;
-	Gen_UKF_U.P[17]=0;
+	ExtU.P_i[12]=0;
+	ExtU.P_i[13]=0;
+	ExtU.P_i[14]=0.2;
+	ExtU.P_i[15]=0;
+	ExtU.P_i[16]=0;
+	ExtU.P_i[17]=0;
 	
-	Gen_UKF_U.P[18]=0;
-	Gen_UKF_U.P[19]=0;
-	Gen_UKF_U.P[20]=0;
-	Gen_UKF_U.P[21]=0.2;
-	Gen_UKF_U.P[22]=0;
-	Gen_UKF_U.P[23]=0;
+	ExtU.P_i[18]=0;
+	ExtU.P_i[19]=0;
+	ExtU.P_i[20]=0;
+	ExtU.P_i[21]=0.2;
+	ExtU.P_i[22]=0;
+	ExtU.P_i[23]=0;
 
-	Gen_UKF_U.P[24]=0;
-	Gen_UKF_U.P[25]=0;
-	Gen_UKF_U.P[26]=0;
-	Gen_UKF_U.P[27]=0;
-	Gen_UKF_U.P[28]=0.2;
-	Gen_UKF_U.P[29]=0;
+	ExtU.P_i[24]=0;
+	ExtU.P_i[25]=0;
+	ExtU.P_i[26]=0;
+	ExtU.P_i[27]=0;
+	ExtU.P_i[28]=0.2;
+	ExtU.P_i[29]=0;
 	
-	Gen_UKF_U.P[30]=0;
-	Gen_UKF_U.P[31]=0;
-	Gen_UKF_U.P[32]=0;
-	Gen_UKF_U.P[33]=0;
-	Gen_UKF_U.P[34]=0;
-	Gen_UKF_U.P[35]=0.2;
+	ExtU.P_i[30]=0;
+	ExtU.P_i[31]=0;
+	ExtU.P_i[32]=0;
+	ExtU.P_i[33]=0;
+	ExtU.P_i[34]=0;
+	ExtU.P_i[35]=0.2;
 }
 /*-----------------wind_estimator_init----------------*/
 /*  Init the Thread and the calculator   	 		  */
