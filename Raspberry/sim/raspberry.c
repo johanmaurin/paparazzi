@@ -72,7 +72,7 @@ void send_wind_estimation(){
 	add_data_to_ivy_string_UINT8(full_data,ID_AC,1);
 	
 	/*The Second data is a copy*/ 
-   add_data_to_ivy_string_UINT8(full_data,3,0);
+   add_data_to_ivy_string_UINT8(full_data,7,0);
    /*The Third data is a copy*/ 
     /*Eath : Xout 4*/
 	add_data_to_ivy_string_FLOAT(full_data,Answer_State.storage_tab_float[4],0);
