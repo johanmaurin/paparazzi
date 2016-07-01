@@ -7,18 +7,20 @@
  *
  * Code generated for Simulink model 'Gen_UKF'.
  *
- * Model version                  : 1.8
- * Simulink Coder version         : 8.8 (R2015a) 09-Feb-2015
- * C/C++ source code generated on : Tue Apr 26 10:28:27 2016
+ * Model version                  : 1.32
+ * Simulink Coder version         : 8.10 (R2016a) 10-Feb-2016
+ * C/C++ source code generated on : Thu Jun 30 23:12:10 2016
  *
  * Target selection: ert.tlc
- * Embedded hardware selection: 32-bit Generic
- * Code generation objectives: Unspecified
+ * Embedded hardware selection: Custom Processor->Custom
+ * Code generation objectives:
+ *    1. Execution efficiency
+ *    2. RAM efficiency
  * Validation result: Not run
  */
 
-#ifndef __RTWTYPES_H__
-#define __RTWTYPES_H__
+#ifndef RTWTYPES_H
+#define RTWTYPES_H
 
 /* Logical type definitions */
 #if (!defined(__cplusplus))
@@ -33,12 +35,12 @@
 
 /*=======================================================================*
  * Target hardware information
- *   Device type: 32-bit Generic
+ *   Device type: Custom Processor->Custom
  *   Number of bits:     char:   8    short:   16    int:  32
  *                       long:  32
  *                       native word size:  32
- *   Byte ordering: Unspecified
- *   Signed integer division rounds to: Undefined
+ *   Byte ordering: LittleEndian
+ *   Signed integer division rounds to: Zero
  *   Shift right on a signed integer as arithmetic shift: on
  *=======================================================================*/
 
@@ -58,8 +60,8 @@ typedef float real32_T;
 typedef double real64_T;
 
 /*===========================================================================*
- * Generic type definitions: real_T, time_T, boolean_T, int_T, uint_T,       *
- *                           ulong_T, char_T and byte_T.                     *
+ * Generic type definitions: boolean_T, char_T, byte_T, int_T, uint_T,       *
+ *                           real_T, time_T, ulong_T.                        *
  *===========================================================================*/
 typedef double real_T;
 typedef double time_T;
@@ -89,7 +91,7 @@ typedef char_T byte_T;
 /* Block D-Work pointer type */
 typedef void * pointer_T;
 
-#endif                                 /* __RTWTYPES_H__ */
+#endif                                 /* RTWTYPES_H */
 
 /*
  * File trailer for generated code.

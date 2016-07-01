@@ -7,13 +7,15 @@
  *
  * Code generated for Simulink model 'Gen_UKF'.
  *
- * Model version                  : 1.8
- * Simulink Coder version         : 8.8 (R2015a) 09-Feb-2015
- * C/C++ source code generated on : Tue Apr 26 10:28:27 2016
+ * Model version                  : 1.32
+ * Simulink Coder version         : 8.10 (R2016a) 10-Feb-2016
+ * C/C++ source code generated on : Thu Jun 30 23:12:10 2016
  *
  * Target selection: ert.tlc
- * Embedded hardware selection: 32-bit Generic
- * Code generation objectives: Unspecified
+ * Embedded hardware selection: Custom Processor->Custom
+ * Code generation objectives:
+ *    1. Execution efficiency
+ *    2. RAM efficiency
  * Validation result: Not run
  */
 
@@ -21,88 +23,57 @@
 #define RTW_HEADER_Gen_UKF_h_
 #include <math.h>
 #include <string.h>
-#include <stddef.h>
 #ifndef Gen_UKF_COMMON_INCLUDES_
 # define Gen_UKF_COMMON_INCLUDES_
 #include "rtwtypes.h"
 #endif                                 /* Gen_UKF_COMMON_INCLUDES_ */
 
-#include "Gen_UKF_types.h"
-
 /* Macros for accessing real-time model data structure */
-#ifndef rtmGetErrorStatus
-# define rtmGetErrorStatus(rtm)        ((rtm)->errorStatus)
-#endif
 
-#ifndef rtmSetErrorStatus
-# define rtmSetErrorStatus(rtm, val)   ((rtm)->errorStatus = (val))
-#endif
-
-/* Block states (auto storage) for system '<Root>' */
+/* Block signals and states (auto storage) for system '<Root>' */
 typedef struct {
-  real_T Delay_DSTATE[36];             /* '<Root>/ Delay' */
-  real_T Delay1_DSTATE[6];             /* '<Root>/ Delay1' */
+  real32_T Delay_DSTATE[36];           /* '<Root>/ Delay' */
+  real32_T Delay1_DSTATE[6];           /* '<Root>/ Delay1' */
   boolean_T x_not_empty;               /* '<Root>/initialization' */
   boolean_T P_not_empty;               /* '<Root>/initialization' */
-} DW_Gen_UKF_T;
+} DW;
 
 /* External inputs (root inport signals with auto storage) */
 typedef struct {
-  real_T omegaa[6];                    /* '<Root>/[omega a]' */
-  real_T zk[5];                        /* '<Root>/zk' */
-  real_T x0[6];                        /* '<Root>/x0' */
-  real_T P[36];                        /* '<Root>/P' */
-  real_T alpha;                        /* '<Root>/alpha' */
-  real_T ki;                           /* '<Root>/ki' */
-  real_T beta;                         /* '<Root>/beta' */
-  real_T Q[36];                        /* '<Root>/Q' */
-  real_T R[25];                        /* '<Root>/R' */
-  real_T dt;                           /* '<Root>/dt' */
-  real_T phi;                          /* '<Root>/phi' */
-  real_T theta;                        /* '<Root>/theta' */
-  real_T q[4];                         /* '<Root>/q' */
-} ExtU_Gen_UKF_T;
+  real32_T omegaa[6];                  /* '<Root>/[omega a]' */
+  real32_T zk[5];                      /* '<Root>/zk' */
+  real32_T x0[6];                      /* '<Root>/x0' */
+  real32_T P_i[36];                    /* '<Root>/P' */
+  real32_T alpha;                      /* '<Root>/alpha' */
+  real32_T ki;                         /* '<Root>/ki' */
+  real32_T beta;                       /* '<Root>/beta' */
+  real32_T Q[36];                      /* '<Root>/Q' */
+  real32_T R[25];                      /* '<Root>/R' */
+  real32_T dt;                         /* '<Root>/dt' */
+  real32_T phi;                        /* '<Root>/phi' */
+  real32_T theta;                      /* '<Root>/theta' */
+  real32_T q[4];                       /* '<Root>/q' */
+} ExtU;
 
 /* External outputs (root outports fed by signals with auto storage) */
 typedef struct {
-  real_T sqrtP[6];                     /* '<Root>/sqrtP' */
-  real_T xout[6];                      /* '<Root>/xout' */
-  real_T Pout[36];                     /* '<Root>/Pout' */
-} ExtY_Gen_UKF_T;
+  real32_T sqrtP[6];                   /* '<Root>/sqrtP' */
+  real32_T xout[6];                    /* '<Root>/xout' */
+  real32_T Pout[36];                   /* '<Root>/Pout' */
+} ExtY;
 
-/* Parameters (auto storage) */
-struct P_Gen_UKF_T_ {
-  real_T Delay_InitialCondition;       /* Expression: 0
-                                        * Referenced by: '<Root>/ Delay'
-                                        */
-  real_T Delay1_InitialCondition;      /* Expression: 0
-                                        * Referenced by: '<Root>/ Delay1'
-                                        */
-};
-
-/* Real-time Model Data Structure */
-struct tag_RTM_Gen_UKF_T {
-  const char_T * volatile errorStatus;
-};
-
-/* Block parameters (auto storage) */
-extern P_Gen_UKF_T Gen_UKF_P;
-
-/* Block states (auto storage) */
-extern DW_Gen_UKF_T Gen_UKF_DW;
+/* Block signals and states (auto storage) */
+extern DW rtDW;
 
 /* External inputs (root inport signals with auto storage) */
-extern ExtU_Gen_UKF_T Gen_UKF_U;
+extern ExtU rtU;
 
 /* External outputs (root outports fed by signals with auto storage) */
-extern ExtY_Gen_UKF_T Gen_UKF_Y;
+extern ExtY rtY;
 
 /* Model entry point functions */
 extern void Gen_UKF_initialize(void);
 extern void Gen_UKF_step(void);
-
-/* Real-time Model object */
-extern RT_MODEL_Gen_UKF_T *const Gen_UKF_M;
 
 /*-
  * The generated code includes comments that allow you to trace directly
