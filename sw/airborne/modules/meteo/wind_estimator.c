@@ -15,7 +15,9 @@
 #include "state.h"
 #include <ch.h>
 #include <hal.h>
+#include "led.h"
 #include "main_chibios.h"
+#include "mcu_periph/sys_time.h"
 #include "modules/loggers/sdlog_chibios/sdLog.h"
 #include "modules/loggers/sdlog_chibios/usbStorage.h"
 #include "modules/loggers/sdlog_chibios.h"
@@ -86,7 +88,7 @@ void get_wind_from_wind_estimation(void){
 	
 	j=0;
 	for(int i=0;i<NBR_ANSWER;i++){
-		Answer_State_Wind.storage_tab_float[i] = (float)ExtY.xout[j];
+		Answer_State_Wind.storage_tab_float[i] = (float)rtY.xout[j];
 		j++;
 	}
 }
@@ -100,26 +102,26 @@ void parse_data_for_wind_estimation(void){
 	/*Put data in OmegaA*/
 	j=0;
 	for(i=0;i<6;i++){
-		ExtU.omegaa[i]=Data_State_Wind.storage_tab_float[j];
+		rtU.omegaa[i]=Data_State_Wind.storage_tab_float[j];
 		j++;
 	}
 	/*Put data in Zk*/
 	for(i=0;i<5;i++){
-		ExtU.zk[i]=Data_State_Wind.storage_tab_float[j];
+		rtU.zk[i]=Data_State_Wind.storage_tab_float[j];
 		j++;
 	}
 	/*Put data in Q (the quaterion)*/	
 	for(i=0;i<4;i++){
-		ExtU.q[i]=Data_State_Wind.storage_tab_float[j];
+		rtU.q[i]=Data_State_Wind.storage_tab_float[j];
 		j++;
 	}
 	/*Put data in Phi*/	
-	ExtU.phi = Data_State_Wind.storage_tab_float[i];
+	rtU.phi = Data_State_Wind.storage_tab_float[i];
 	i++;
 	/*Put data in Alpha*/	
-	ExtU.theta = Data_State_Wind.storage_tab_float[i];
+	rtU.theta = Data_State_Wind.storage_tab_float[i];
 	
-	ExtU.dt=time_calculator_dt;
+	rtU.dt=time_calculator_dt;
 }
 /*------------------thd_windestimate------------------*/
 /*  Thread fonction                      	 		  */
@@ -145,7 +147,9 @@ static void thd_windestimate(void *arg)
 	  }
 	  
 	  parse_data_for_wind_estimation();
+    LED_ON(4);
 	  Gen_UKF_step();
+    LED_OFF(4);
 	  get_wind_from_wind_estimation();
 	  
 	  chMtxUnlock(&writeread_state_mtx);
@@ -160,145 +164,145 @@ void init_calculator(void){
 	
 	Gen_UKF_initialize();
 		
-	ExtU.R[0]=pow(1.5,2);
-	ExtU.R[1]=0;
-	ExtU.R[2]=0;
-	ExtU.R[3]=0;
-	ExtU.R[4]=0;
+	rtU.R[0]=pow(1.5,2);
+	rtU.R[1]=0;
+	rtU.R[2]=0;
+	rtU.R[3]=0;
+	rtU.R[4]=0;
 	
-	ExtU.R[5]=0;
-	ExtU.R[6]=pow(1.5,2);
-	ExtU.R[7]=0;
-	ExtU.R[8]=0;
-	ExtU.R[9]=0;
+	rtU.R[5]=0;
+	rtU.R[6]=pow(1.5,2);
+	rtU.R[7]=0;
+	rtU.R[8]=0;
+	rtU.R[9]=0;
 	
-	ExtU.R[10]=0;
-	ExtU.R[11]=0;
-	ExtU.R[12]=pow(1.5,2);
-	ExtU.R[13]=0;
-	ExtU.R[14]=0;
+	rtU.R[10]=0;
+	rtU.R[11]=0;
+	rtU.R[12]=pow(1.5,2);
+	rtU.R[13]=0;
+	rtU.R[14]=0;
 	
-	ExtU.R[15]=0;
-	ExtU.R[16]=0;
-	ExtU.R[17]=0;
-	ExtU.R[18]=pow(0.1,2);
-	ExtU.R[19]=0;
+	rtU.R[15]=0;
+	rtU.R[16]=0;
+	rtU.R[17]=0;
+	rtU.R[18]=pow(0.1,2);
+	rtU.R[19]=0;
 	
-	ExtU.R[20]=0;
-	ExtU.R[21]=0;
-	ExtU.R[22]=0;
-	ExtU.R[23]=0;
-	ExtU.R[2]=pow(0.001,2);
+	rtU.R[20]=0;
+	rtU.R[21]=0;
+	rtU.R[22]=0;
+	rtU.R[23]=0;
+	rtU.R[2]=pow(0.001,2);
 	
 	/*-------------------*/
 	
-	ExtU.Q[0]=pow(0.01,2);
-	ExtU.Q[1]=0;
-	ExtU.Q[2]=0;
-	ExtU.Q[3]=0;
-	ExtU.Q[4]=0;
-	ExtU.Q[5]=0;
+	rtU.Q[0]=pow(0.01,2);
+	rtU.Q[1]=0;
+	rtU.Q[2]=0;
+	rtU.Q[3]=0;
+	rtU.Q[4]=0;
+	rtU.Q[5]=0;
 	
-	ExtU.Q[6]=0;
-	ExtU.Q[7]=pow(0.01,2);
-	ExtU.Q[8]=0;
-	ExtU.Q[9]=0;
-	ExtU.Q[10]=0;
-	ExtU.Q[11]=0;
+	rtU.Q[6]=0;
+	rtU.Q[7]=pow(0.01,2);
+	rtU.Q[8]=0;
+	rtU.Q[9]=0;
+	rtU.Q[10]=0;
+	rtU.Q[11]=0;
 	
-	ExtU.Q[12]=0;
-	ExtU.Q[13]=0;
-	ExtU.Q[14]=pow(0.01,2);
-	ExtU.Q[15]=0;
-	ExtU.Q[16]=0;
-	ExtU.Q[17]=0;
+	rtU.Q[12]=0;
+	rtU.Q[13]=0;
+	rtU.Q[14]=pow(0.01,2);
+	rtU.Q[15]=0;
+	rtU.Q[16]=0;
+	rtU.Q[17]=0;
 	
-	ExtU.Q[18]=0;
-	ExtU.Q[19]=0;
-	ExtU.Q[20]=0;
-	ExtU.Q[21]=0.1;
-	ExtU.Q[22]=0;
-	ExtU.Q[23]=0;
+	rtU.Q[18]=0;
+	rtU.Q[19]=0;
+	rtU.Q[20]=0;
+	rtU.Q[21]=0.1;
+	rtU.Q[22]=0;
+	rtU.Q[23]=0;
 
-	ExtU.Q[24]=0;
-	ExtU.Q[25]=0;
-	ExtU.Q[26]=0;
-	ExtU.Q[27]=0;
-	ExtU.Q[28]=0.1;
-	ExtU.Q[29]=0;
+	rtU.Q[24]=0;
+	rtU.Q[25]=0;
+	rtU.Q[26]=0;
+	rtU.Q[27]=0;
+	rtU.Q[28]=0.1;
+	rtU.Q[29]=0;
 	
-	ExtU.Q[30]=0;
-	ExtU.Q[31]=0;
-	ExtU.Q[32]=0;
-	ExtU.Q[33]=0;
-	ExtU.Q[34]=0;
-	ExtU.Q[35]=0.01;
+	rtU.Q[30]=0;
+	rtU.Q[31]=0;
+	rtU.Q[32]=0;
+	rtU.Q[33]=0;
+	rtU.Q[34]=0;
+	rtU.Q[35]=0.01;
 	
 	/*------------------*/
 	
 	
-	ExtU.alpha =0.5;
+	rtU.alpha =0.5;
 	
-	ExtU.ki=0;
+	rtU.ki=0;
 	
-	ExtU.beta = 2;
+	rtU.beta = 2;
 	
-	ExtU.dt=0.02;
+	rtU.dt=0.02;
 	
 	
 	/*---------*/
 	
 	
-	ExtU.x0[0] = 0;
-	ExtU.x0[1] = 0;
-	ExtU.x0[2] = 0;
-	ExtU.x0[3] = 0;
-	ExtU.x0[4] = 0;
-	ExtU.x0[5] = 0;
+	rtU.x0[0] = 0;
+	rtU.x0[1] = 0;
+	rtU.x0[2] = 0;
+	rtU.x0[3] = 0;
+	rtU.x0[4] = 0;
+	rtU.x0[5] = 0;
 	
 	/*--------------------*/
 	
-	ExtU.P_i[0]=0.2;
-	ExtU.P_i[1]=0;
-	ExtU.P_i[2]=0;
-	ExtU.P_i[3]=0;
-	ExtU.P_i[4]=0;
-	ExtU.P_i[5]=0;
+	rtU.P_i[0]=0.2;
+	rtU.P_i[1]=0;
+	rtU.P_i[2]=0;
+	rtU.P_i[3]=0;
+	rtU.P_i[4]=0;
+	rtU.P_i[5]=0;
 	
-	ExtU.P_i[6]=0;
-	ExtU.P_i[7]=0.2;
-	ExtU.P_i[8]=0;
-	ExtU.P_i[9]=0;
-	ExtU.P_i[10]=0;
-	ExtU.P_i[11]=0;
+	rtU.P_i[6]=0;
+	rtU.P_i[7]=0.2;
+	rtU.P_i[8]=0;
+	rtU.P_i[9]=0;
+	rtU.P_i[10]=0;
+	rtU.P_i[11]=0;
 	
-	ExtU.P_i[12]=0;
-	ExtU.P_i[13]=0;
-	ExtU.P_i[14]=0.2;
-	ExtU.P_i[15]=0;
-	ExtU.P_i[16]=0;
-	ExtU.P_i[17]=0;
+	rtU.P_i[12]=0;
+	rtU.P_i[13]=0;
+	rtU.P_i[14]=0.2;
+	rtU.P_i[15]=0;
+	rtU.P_i[16]=0;
+	rtU.P_i[17]=0;
 	
-	ExtU.P_i[18]=0;
-	ExtU.P_i[19]=0;
-	ExtU.P_i[20]=0;
-	ExtU.P_i[21]=0.2;
-	ExtU.P_i[22]=0;
-	ExtU.P_i[23]=0;
+	rtU.P_i[18]=0;
+	rtU.P_i[19]=0;
+	rtU.P_i[20]=0;
+	rtU.P_i[21]=0.2;
+	rtU.P_i[22]=0;
+	rtU.P_i[23]=0;
 
-	ExtU.P_i[24]=0;
-	ExtU.P_i[25]=0;
-	ExtU.P_i[26]=0;
-	ExtU.P_i[27]=0;
-	ExtU.P_i[28]=0.2;
-	ExtU.P_i[29]=0;
+	rtU.P_i[24]=0;
+	rtU.P_i[25]=0;
+	rtU.P_i[26]=0;
+	rtU.P_i[27]=0;
+	rtU.P_i[28]=0.2;
+	rtU.P_i[29]=0;
 	
-	ExtU.P_i[30]=0;
-	ExtU.P_i[31]=0;
-	ExtU.P_i[32]=0;
-	ExtU.P_i[33]=0;
-	ExtU.P_i[34]=0;
-	ExtU.P_i[35]=0.2;
+	rtU.P_i[30]=0;
+	rtU.P_i[31]=0;
+	rtU.P_i[32]=0;
+	rtU.P_i[33]=0;
+	rtU.P_i[34]=0;
+	rtU.P_i[35]=0.2;
 }
 /*-----------------wind_estimator_init----------------*/
 /*  Init the Thread and the calculator   	 		  */

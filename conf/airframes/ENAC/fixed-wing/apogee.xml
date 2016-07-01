@@ -12,10 +12,13 @@
     <target name="ap" board="apogee_1.0_chibios">
       <module name="radio_control" type="sbus"/>
       <configure name="PERIODIC_FREQUENCY" value="100"/>
-      <module name="extra_dl">
+      <!--module name="extra_dl">
 	<configure name="EXTRA_DL_PORT" value="UART6"/>
     	<configure name="EXTRA_DL_BAUD" value="B57600"/>
-      </module>
+      </module-->
+      <module name="wind_estimator"/>
+      <module name="rtos_mon"/>
+
     </target>
     <target name="sim" board="pc">
       <module name="radio_control" type="ppm"/>
@@ -35,10 +38,13 @@
 	<configure name="EXTRA_DL_PORT" value="UDP0"/>
     	<configure name="EXTRA_DL_BAUD" value="B57600"/><!-- for compilation only -->
       </module>
+      <module name="wind_raspi_estimator"/>
+      <define name="USE_NPS_AIRSPEED"/>
+      <define name="USE_NPS_SLIDESPEED"/>
+      <define name="USE_NPS_AOA"/>
+
     </target>
 
-    
-	
     <define name="USE_I2C1"/>
     <!--define name="USE_I2C2"/-->
     <!--define name="AGR_CLIMB"/-->
@@ -60,12 +66,6 @@
     <module name="navigation"/>
     <!-- Sensors -->
     <module name="gps" type="ublox"/>
-
-    <module name="wind_raspi_estimator"/>
-    <define name="USE_NPS_AIRSPEED"/>
-    <define name="USE_NPS_SLIDESPEED"/>
-    <define name="USE_NPS_AOA"/>
-    <!--module name="wind_estimator"/-->
 
     <!--module name="spi_master"/-->
     <!-- <module name="mcp355x"> -->

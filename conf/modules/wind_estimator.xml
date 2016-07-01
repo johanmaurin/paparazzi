@@ -13,7 +13,7 @@
   <makefile>
     <file name="wind_estimator.c"/>
     <file name="lib_ukf_wind_estimator/Gen_UKF.c"/>
-    <file name="lib_ukf_wind_estimator/Gen_UKF_data.c"/>
+    <define name="WIND_INFO_RET"/>
   </makefile>
 </module>
 
