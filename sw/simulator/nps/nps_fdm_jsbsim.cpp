@@ -456,15 +456,12 @@ static void fetch_state(void)
   fdm.total_pressure = PascalOfPsf(FDMExec->GetAuxiliary()->GetTotalPressure());
   fdm.dynamic_pressure = PascalOfPsf(FDMExec->GetAuxiliary()->Getqbar());
   fdm.temperature = CelsiusOfRankine(FDMExec->GetAtmosphere()->GetTemperature());
-  
+
   /*
    *  angle of attack and SlideSlip.
    */
-  
-  fdm.AOA = (-1 * FDMExec->GetPropertyManager()->GetNode("aero/alpha-rad")->getDoubleValue()) /
-                     NPS_JSBSIM_AILERON_MAX_RAD;
-  fdm.sideslip = (-1 * FDMExec->GetPropertyManager()->GetNode("aero/beta-rad")->getDoubleValue()) /
-                     NPS_JSBSIM_AILERON_MAX_RAD;
+  fdm.AOA = FDMExec->GetPropertyManager()->GetNode("aero/alpha-rad")->getDoubleValue();
+  fdm.sideslip = FDMExec->GetPropertyManager()->GetNode("aero/beta-rad")->getDoubleValue();
 
   /*
    * Control surface positions
