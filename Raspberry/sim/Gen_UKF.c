@@ -878,6 +878,10 @@ static void Gen_UKF_h(const real_T x[6], const real_T q[4], real_T y[5])
            qinter_idx_2 * qinv_idx_0) + qinv_idx_2 * -qnrm) + x[4];
   y[2] = (((qinter_idx_1 * qinv_idx_2 - qinter_idx_2 * qinv_idx_1) +
            qinter_idx_3 * qinv_idx_0) + qinv_idx_3 * -qnrm) + x[5];
+  printf("h : %f %f %f | %f %f %f | %f %f %f\n",
+      y[0], y[0] - x[3], x[3],
+      y[1], y[1] - x[4], x[4],
+      y[2], y[2] - x[5], x[5]);
   y[3] = x[0];
   y[4] = atan(x[2] / x[0]);
 }
@@ -1331,6 +1335,9 @@ void Gen_UKF_step(void)
   /* '<S2>:1:26' */
   memset(&rtb_Y[0], 0, 78U * sizeof(real_T));
 
+    for (i = 0; i < 6; i++) {
+      printf("x%d = %f\n",i, rtb_X[i]);
+    }
   /* '<S2>:1:27' */
   for (k = 0; k < 13; k++) {
     /* '<S2>:1:27' */
@@ -1348,6 +1355,9 @@ void Gen_UKF_step(void)
 
     /* '<S2>:1:27' */
   }
+    for (i = 0; i < 6; i++) {
+      printf("xp%d = %f\n",i, rtb_y[i]);
+    }
 
   /* '<S2>:1:33' */
   memcpy(&SQ[0], &Gen_UKF_U.Q[0], 36U * sizeof(real_T));
@@ -1620,6 +1630,9 @@ void Gen_UKF_step(void)
   /* '<S1>:1:30' */
   memset(&rtb_Z[0], 0, 65U * sizeof(real_T));
 
+    for (i = 0; i < 6; i++) {
+      printf("y%d = %f\n", i, rtb_Y[i]);
+    }
   /* "for" loop for "measures predicted" and "sigmas_measures" predicted */
   /* '<S1>:1:33' */
   for (k = 0; k < 13; k++) {
@@ -1638,6 +1651,9 @@ void Gen_UKF_step(void)
 
     /* '<S1>:1:33' */
   }
+    for (i = 0; i < 5; i++) {
+      printf("z%d = %f\n", i, rtb_z[i]);
+    }
 
   /* Square-root of R */
   /* '<S1>:1:44' */
@@ -1959,12 +1975,15 @@ void Gen_UKF_step(void)
   /* Cholesky factorization : U = K * Sz    */
   /* '<S4>:1:18' */
   for (i = 0; i < 6; i++) {
+    printf("k%d = ",i);
     for (b_iy = 0; b_iy < 5; b_iy++) {
+      printf("%f ",K[6*b_iy + i]);
       U[i + 6 * b_iy] = 0.0;
       for (info = 0; info < 5; info++) {
         U[i + 6 * b_iy] += K[6 * info + i] * rtb_J[5 * b_iy + info];
       }
     }
+    printf("\n");
   }
 
   /* "for" loop for cholesky factorization */
@@ -2104,23 +2123,30 @@ void Gen_UKF_step(void)
     }
   }
 
+  printf("res ");
   for (i = 0; i < 5; i++) {
     p[i] = Gen_UKF_U.zk[i] - rtb_z[i];
+    printf("%f ",p[i]);
   }
+  printf("\nlbd ");
 
   for (i = 0; i < 6; i++) {
     lambda = 0.0;
     for (b_iy = 0; b_iy < 5; b_iy++) {
       lambda += K[6 * b_iy + i] * p[b_iy];
     }
+    printf("%f ",lambda);
 
     rtb_x1[i] = rtb_y[i] + lambda;
   }
+  printf("\nout ");
 
   /* Outport: '<Root>/xout' */
   for (i = 0; i < 6; i++) {
     Gen_UKF_Y.xout[i] = rtb_x1[i];
+    printf("%f ",rtb_x1[i]);
   }
+  printf("\n");
 
   for (i = 0; i < 36; i++) {
     /* Outport: '<Root>/Pout' */
