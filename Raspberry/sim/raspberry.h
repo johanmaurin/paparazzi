@@ -48,7 +48,7 @@ char* name_data_send_back[NBR_DATA_SEND_BACK]={
 /* (ther place in the chaine of data than the program will send)   */
 /*-----------------------------------------------------------------*/
 int size_of_answer[NBR_DIFF_ANSWER]={
-2,
+6,
 36
 };
 /*Structur of the data to storage before to calcul*/
