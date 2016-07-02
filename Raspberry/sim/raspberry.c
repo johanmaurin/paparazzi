@@ -201,28 +201,28 @@ void init(){
 	
 	Gen_UKF_initialize();
 	
-	Gen_UKF_U.R[0]=pow(1.5,2);
+	Gen_UKF_U.R[0]=pow(0.5,2);
 	Gen_UKF_U.R[1]=0;
 	Gen_UKF_U.R[2]=0;
 	Gen_UKF_U.R[3]=0;
 	Gen_UKF_U.R[4]=0;
 	
 	Gen_UKF_U.R[5]=0;
-	Gen_UKF_U.R[6]=pow(1.5,2);
+	Gen_UKF_U.R[6]=pow(0.5,2);
 	Gen_UKF_U.R[7]=0;
 	Gen_UKF_U.R[8]=0;
 	Gen_UKF_U.R[9]=0;
 	
 	Gen_UKF_U.R[10]=0;
 	Gen_UKF_U.R[11]=0;
-	Gen_UKF_U.R[12]=pow(1.5,2);
+	Gen_UKF_U.R[12]=pow(0.5,2);
 	Gen_UKF_U.R[13]=0;
 	Gen_UKF_U.R[14]=0;
 	
 	Gen_UKF_U.R[15]=0;
 	Gen_UKF_U.R[16]=0;
 	Gen_UKF_U.R[17]=0;
-	Gen_UKF_U.R[18]=pow(0.1,2);
+	Gen_UKF_U.R[18]=pow(0.01,2);
 	Gen_UKF_U.R[19]=0;
 	
 	Gen_UKF_U.R[20]=0;
@@ -233,7 +233,7 @@ void init(){
 	
 	/*-------------------*/
 	
-	Gen_UKF_U.Q[0]=pow(0.01,2);
+	Gen_UKF_U.Q[0]=pow(1,2);
 	Gen_UKF_U.Q[1]=0;
 	Gen_UKF_U.Q[2]=0;
 	Gen_UKF_U.Q[3]=0;
@@ -241,7 +241,7 @@ void init(){
 	Gen_UKF_U.Q[5]=0;
 	
 	Gen_UKF_U.Q[6]=0;
-	Gen_UKF_U.Q[7]=pow(0.01,2);
+	Gen_UKF_U.Q[7]=pow(1,2);
 	Gen_UKF_U.Q[8]=0;
 	Gen_UKF_U.Q[9]=0;
 	Gen_UKF_U.Q[10]=0;
@@ -249,7 +249,7 @@ void init(){
 	
 	Gen_UKF_U.Q[12]=0;
 	Gen_UKF_U.Q[13]=0;
-	Gen_UKF_U.Q[14]=pow(0.01,2);
+	Gen_UKF_U.Q[14]=pow(1,2);
 	Gen_UKF_U.Q[15]=0;
 	Gen_UKF_U.Q[16]=0;
 	Gen_UKF_U.Q[17]=0;
@@ -273,7 +273,7 @@ void init(){
 	Gen_UKF_U.Q[32]=0;
 	Gen_UKF_U.Q[33]=0;
 	Gen_UKF_U.Q[34]=0;
-	Gen_UKF_U.Q[35]=0.01;
+	Gen_UKF_U.Q[35]=0.1;
 	
 	/*------------------*/
 	
