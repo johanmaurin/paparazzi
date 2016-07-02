@@ -50,10 +50,25 @@ void get_data_from_state(void){
 	
 	get_old_data();
 	
+  // get "fake" IMU data in body frame
+  struct FloatVect3 accel_ned = {
+    stateGetAccelNed_f()->x,
+    stateGetAccelNed_f()->y,
+    stateGetAccelNed_f()->z
+  };
+  accel_ned.z -= 9.81f;
+  struct FloatRMat *ned_to_body = stateGetNedToBodyRMat_f();
+  struct FloatVect3 accel_body;
+  float_rmat_vmult(&accel_body, ned_to_body, &accel_ned);
+
 	Data_State.storage.omega = *stateGetBodyRates_f(); //   rad/s
-	Data_State.storage.omega_A = *stateGetAccelNed_f(); //   m/s^2
+	//Data_State.storage.omega_A = *stateGetAccelNed_f(); //   m/s^2
+	Data_State.storage.omega_A.x = accel_body.x; //   m/s^2
+	Data_State.storage.omega_A.y = accel_body.y; //   m/s^2
+	Data_State.storage.omega_A.z = accel_body.z; //   m/s^2
 	Data_State.storage.Zk_V = *stateGetSpeedNed_f(); //    m/s
-	Data_State.storage.Zk_Va =  stateGetAirspeed_f()*cos(stateGetAngleOfAttack_f())*cos(stateGetSideslip_f());    //    m/s  // projection de la norme qur l'axe X (cos sin)
+	Data_State.storage.Zk_Va =  stateGetAirspeed_f();    //    m/s  // projection de la norme qur l'axe X (cos sin)
+	//Data_State.storage.Zk_Va =  stateGetAirspeed_f()*cos(stateGetAngleOfAttack_f())*cos(stateGetSideslip_f());    //    m/s  // projection de la norme qur l'axe X (cos sin)
 	Data_State.storage.Zk_AOA = stateGetAngleOfAttack_f();   // rad.
 	Data_State.storage.q = *stateGetNedToBodyQuat_f();
 	Data_State.storage.phi = stateGetNedToBodyEulers_f()->phi; //rad
