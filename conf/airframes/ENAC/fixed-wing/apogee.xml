@@ -13,43 +13,43 @@
       <module name="radio_control" type="sbus"/>
       <configure name="PERIODIC_FREQUENCY" value="100"/>
       <!--module name="extra_dl">
-	<configure name="EXTRA_DL_PORT" value="UART6"/>
-    	<configure name="EXTRA_DL_BAUD" value="B57600"/>
+        <configure name="EXTRA_DL_PORT" value="UART6"/>
+        <configure name="EXTRA_DL_BAUD" value="B57600"/>
       </module-->
       <module name="wind_estimator"/>
       <module name="rtos_mon"/>
 
+      <module name="ahrs"    type="float_dcm"/>
+      <module name="ins"     type="alt_float"/>
     </target>
     <target name="sim" board="pc">
       <module name="radio_control" type="ppm"/>
+      <module name="ahrs"    type="float_dcm"/>
+      <module name="ins"     type="alt_float"/>
     </target>
     <target name="nps" board="pc">
+      <configure name="PERIODIC_FREQUENCY" value="125"/>
       <!-- Note NPS needs the ppm type radio_control module -->
       <module name="fdm" type="jsbsim"/>
-      <!--module name="ins" type="float_invariant">
+      <module name="ins" type="float_invariant">
         <configure name="AHRS_PROPAGATE_FREQUENCY" value="125"/>
         <configure name="AHRS_CORRECT_FREQUENCY" value="125"/>
         <define name="BARO_BOARD_APOGEE_FREQ" value="50"/>
         <define name="MPL3115_OVERSAMPLING" value="2"/>
         <define name="SEND_INVARIANT_FILTER"/>
-      </module-->
+      </module>
       <module name="radio_control" type="ppm"/>
       <module name="extra_dl">
-	<configure name="EXTRA_DL_PORT" value="UDP0"/>
-    	<configure name="EXTRA_DL_BAUD" value="B57600"/><!-- for compilation only -->
+        <configure name="EXTRA_DL_PORT" value="UDP0"/>
+        <configure name="EXTRA_DL_BAUD" value="B57600"/><!-- for compilation only -->
       </module>
+
       <module name="wind_raspi_estimator"/>
       <define name="USE_NPS_AIRSPEED"/>
       <define name="USE_NPS_SLIDESPEED"/>
       <define name="USE_NPS_AOA"/>
 
     </target>
-
-    <define name="USE_I2C1"/>
-    <!--define name="USE_I2C2"/-->
-    <!--define name="AGR_CLIMB"/-->
-    <!--define name="LOITER_TRIM"/-->
-    <!--define name="PITCH_TRIM"/-->
 
     <!-- Communication -->
     <module name="telemetry" type="xbee_api"/>
@@ -60,22 +60,11 @@
 
     <!-- Actuators are automatically chosen according to board-->
     <module name="imu"     type="apogee"/>
-    <module name="ahrs"    type="float_dcm"/>
-    <module name="ins"     type="alt_float"/>
     <module name="control"/>
     <module name="navigation"/>
     <!-- Sensors -->
     <module name="gps" type="ublox"/>
 
-    <!--module name="spi_master"/-->
-    <!-- <module name="mcp355x"> -->
-    <!--   <define name="USE_SPI1"/> -->
-    <!-- </module> -->
-    <!--module name="extra_dl">
-      <configure name="EXTRA_DL_PORT" value="UART6"/>
-      <configure name="EXTRA_DL_BAUD" value="B57600"/>
-    </module>
-    <module name="meteo_france_DAQ"/-->
   </firmware>
 
   <firmware name="test_chibios">
@@ -168,6 +157,9 @@
   <section name="INS" prefix="INS_">
     <define name="ROLL_NEUTRAL_DEFAULT" value="0." unit="rad"/>
     <define name="PITCH_NEUTRAL_DEFAULT" value="0.144" unit="rad"/>
+    <define name="H_X" value="0.5141"/>
+    <define name="H_Y" value="0.0002"/>
+    <define name="H_Z" value="0.8576"/>
   </section>
 
   <section name="BAT">

@@ -8,8 +8,7 @@
     <file name="wind_raspi_estimator.h"/>
   </header>
   <init fun="init_extra_pprz_raspi()"/>
-  <periodic fun="send_data_to_wind_estimation()" freq="50."  autorun="LOCK"/>
-  <!--datalink message="WIND_INFO" fun="get_wind_from_wind_estimation()"/-->
+  <periodic fun="send_data_to_wind_estimation()" freq="10."  autorun="TRUE"/>
   <makefile>
     <file name="wind_raspi_estimator.c"/>
     <define name="WIND_INFO_RET"/>
