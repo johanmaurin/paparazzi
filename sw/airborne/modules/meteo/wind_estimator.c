@@ -19,6 +19,11 @@
 #include <hal.h>
 #include "mcu_periph/sys_time.h"
 
+#if LOG_WIND_ESTIMATOR
+#include "modules/loggers/sdlog_chibios.h"
+static bool log_we_started;
+#endif
+
 // matrix element
 #define MAT_EL(_m, _l, _c, _n) _m[_l + _c * _n]
 
@@ -206,6 +211,49 @@ static void thd_windestimate(void *arg)
       init_calculator();
     }
 
+#if LOG_MS
+  if (pprzLogFile != -1) {
+    if (!log_we_started) {
+      // print header with initial parameters
+      int i;
+      sdLogWriteLog("# Wind Estimator\n#\n");
+      sdLogWriteLog("# Q = diag( ");
+      for (i = 0; i < 6; i++)
+        sdLogWriteLog("%0.5f ", MAT_EL(rtU.Q, i, i, 6));
+      sdLogWriteLog("\n");
+      sdLogWriteLog("# R = diag( ");
+      for (i = 0; i < 5; i++)
+        sdLogWriteLog("%0.5f ", MAT_EL(rtU.R, i, i, 5));
+      sdLogWriteLog("\n");
+      sdLogWriteLog("# ki = %0.5f\n", rtU.ki);
+      sdLogWriteLog("# alpha = %0.5f\n", rtU.alpha);
+      sdLogWriteLog("# beta = %0.5f\n", rtU.beta);
+      sdLogWriteLog("#\n");
+      sdLogWriteLog("p q r ax ay az vkx vky vkz va aoa q1 q2 q3 q4 phi theta u v w wx wy wz t\n");
+      log_we_started = true;
+    }
+    sdLogWriteLog(pprzLogFile, "%.5f %.5f %.5f %.3f %.3f %.3f %.2f %.2f %.2f %.2f %.5f %.5f %.5f %.5f %.5f %.4f %.4f",
+        Data_State_Wind.storage.rates.p,
+        Data_State_Wind.storage.rates.q,
+        Data_State_Wind.storage.rates.r,
+        Data_State_Wind.storage.accel.x,
+        Data_State_Wind.storage.accel.y,
+        Data_State_Wind.storage.accel.z,
+        Data_State_Wind.storage.Zk_V.x,
+        Data_State_Wind.storage.Zk_V.y,
+        Data_State_Wind.storage.Zk_V.z,
+        Data_State_Wind.storage.Zk_Va,
+        Data_State_Wind.storage.Zk_AOA,
+        Data_State_Wind.storage.q.qi,
+        Data_State_Wind.storage.q.qx,
+        Data_State_Wind.storage.q.qy,
+        Data_State_Wind.storage.q.qz,
+        Data_State_Wind.storage.phi,
+        Data_State_Wind.storage.theta
+        );
+    }
+#endif
+
     if (time_step_before == 0) {
       time_step_before = get_sys_time_msec();
     } else {
@@ -220,8 +268,22 @@ static void thd_windestimate(void *arg)
       get_wind_from_wind_estimation();
       // unlock and set ready flag
       chMtxUnlock(&writeread_state_mtx);
-      data_to_state = 1;
+      data_to_state = true;
     }
+
+#if LOG_WIND_ESTIMATOR
+    if (log_we_started) {
+      sdLogWriteLog(pprzLogFile, "%.3f %.3f %.3f %.3f %.3f %.3f %d\n",
+          Answer_State_Wind.storage.u,
+          Answer_State_Wind.storage.v,
+          Answer_State_Wind.storage.w,
+          Answer_State_Wind.storage.wx,
+          Answer_State_Wind.storage.wy,
+          Answer_State_Wind.storage.wz,
+          time_step_before
+          );
+    }
+#endif
 
   }
 }
@@ -232,6 +294,10 @@ static void thd_windestimate(void *arg)
 void wind_estimator_init(void)
 {
   init_calculator();
+
+#if LOG_WIND_ESTIMATOR
+  log_we_started = false;
+#endif
 
   // Start wind estimation thread
   chThdCreateStatic(wa_thd_windestimation, sizeof(wa_thd_windestimation),

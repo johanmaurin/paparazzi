@@ -16,7 +16,9 @@
         <configure name="EXTRA_DL_PORT" value="UART6"/>
         <configure name="EXTRA_DL_BAUD" value="B57600"/>
       </module-->
-      <module name="wind_estimator"/>
+      <module name="wind_estimator">
+        <define name="LOG_WIND_ESTIMATOR"/>
+      </module>
       <module name="rtos_mon"/>
 
       <module name="ahrs"    type="float_dcm"/>
