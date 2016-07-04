@@ -29,7 +29,6 @@
   <makefile target="ap">
     <file name="wind_estimator.c"/>
     <file name="lib_ukf_wind_estimator/Gen_UKF.c"/>
-    <define name="WIND_INFO_RET"/>
   </makefile>
 </module>
 

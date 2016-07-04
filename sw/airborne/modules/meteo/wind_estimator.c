@@ -19,6 +19,32 @@
 #include <hal.h>
 #include "mcu_periph/sys_time.h"
 
+#ifndef SEND_WIND_ESTIMATOR
+#define SEND_WIND_ESTIMATOR TRUE
+#endif
+
+#include "subsystems/datalink/downlink.h"
+
+static void send_wind_estimator(struct transport_tx *trans, struct link_device *dev)
+{
+  uint8_t flags = 7; // send all data
+  float upwind = -Answer_State_Wind.storage.wz;
+  pprz_msg_send_WIND_INFO_RET(trans, dev, AC_ID,
+      &flags,
+      &Answer_State_Wind.storage.wy, // east
+      &Answer_State_Wind.storage.wx, // north
+      &upwind,
+      &Answer_State_Wind.storage.u);
+}
+
+#if PERIODIC_TELEMETRY
+#include "subsystems/datalink/telemetry.h"
+#endif
+
+#ifndef LOG_WIND_ESTIMATOR
+#define LOG_WIND_ESTIMATOR FALSE
+#endif
+
 #if LOG_WIND_ESTIMATOR
 #include "modules/loggers/sdlog_chibios.h"
 static bool log_we_started;
@@ -147,6 +173,11 @@ void wind_estimator_event(void)
     stateSetAirspeed_f(Answer_State_Wind.storage.u);           // FIXME compute norm ?
     stateSetHorizontalWindspeed_f(&wind_ne);                   //NEED CHECK
     stateSetVerticalWindspeed_f(Answer_State_Wind.storage.wz); //NEED CHECK
+
+#if SEND_WIND_ESTIMATOR
+    // send over telemetry
+    send_wind_estimator(&(DefaultChannel).trans_tx, &(DefaultDevice).device);
+#endif
 
     chMtxUnlock(&writeread_state_mtx);
     data_to_state = 0;
@@ -302,4 +333,10 @@ void wind_estimator_init(void)
   // Start wind estimation thread
   chThdCreateStatic(wa_thd_windestimation, sizeof(wa_thd_windestimation),
                     NORMALPRIO + 2, thd_windestimate, NULL);
+
+#if PERIODIC_TELEMETRY
+  // register for periodic telemetry (for logging with flight recorder)
+  register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_WIND_INFO_RET, send_wind_estimator);
+#endif
 }
+
