@@ -211,25 +211,25 @@ static void thd_windestimate(void *arg)
       init_calculator();
     }
 
-#if LOG_MS
+#if LOG_WIND_ESTIMATOR
   if (pprzLogFile != -1) {
     if (!log_we_started) {
       // print header with initial parameters
       int i;
-      sdLogWriteLog("# Wind Estimator\n#\n");
-      sdLogWriteLog("# Q = diag( ");
+      sdLogWriteLog(pprzLogFile, "# Wind Estimator\n#\n");
+      sdLogWriteLog(pprzLogFile, "# Q = diag( ");
       for (i = 0; i < 6; i++)
-        sdLogWriteLog("%0.5f ", MAT_EL(rtU.Q, i, i, 6));
-      sdLogWriteLog("\n");
-      sdLogWriteLog("# R = diag( ");
+        sdLogWriteLog(pprzLogFile, "%.5f ", MAT_EL(rtU.Q, i, i, 6));
+      sdLogWriteLog(pprzLogFile, ")\n");
+      sdLogWriteLog(pprzLogFile, "# R = diag( ");
       for (i = 0; i < 5; i++)
-        sdLogWriteLog("%0.5f ", MAT_EL(rtU.R, i, i, 5));
-      sdLogWriteLog("\n");
-      sdLogWriteLog("# ki = %0.5f\n", rtU.ki);
-      sdLogWriteLog("# alpha = %0.5f\n", rtU.alpha);
-      sdLogWriteLog("# beta = %0.5f\n", rtU.beta);
-      sdLogWriteLog("#\n");
-      sdLogWriteLog("p q r ax ay az vkx vky vkz va aoa q1 q2 q3 q4 phi theta u v w wx wy wz t\n");
+        sdLogWriteLog(pprzLogFile, "%.5f ", MAT_EL(rtU.R, i, i, 5));
+      sdLogWriteLog(pprzLogFile, ")\n");
+      sdLogWriteLog(pprzLogFile, "# ki = %.5f\n", rtU.ki);
+      sdLogWriteLog(pprzLogFile, "# alpha = %.5f\n", rtU.alpha);
+      sdLogWriteLog(pprzLogFile, "# beta = %.5f\n", rtU.beta);
+      sdLogWriteLog(pprzLogFile, "#\n");
+      sdLogWriteLog(pprzLogFile, "p q r ax ay az vkx vky vkz va aoa q1 q2 q3 q4 phi theta u v w wx wy wz t\n");
       log_we_started = true;
     }
     sdLogWriteLog(pprzLogFile, "%.5f %.5f %.5f %.3f %.3f %.3f %.2f %.2f %.2f %.2f %.5f %.5f %.5f %.5f %.5f %.4f %.4f",
