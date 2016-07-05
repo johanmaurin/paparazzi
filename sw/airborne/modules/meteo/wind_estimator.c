@@ -19,6 +19,37 @@
 #include <hal.h>
 #include "mcu_periph/sys_time.h"
 
+/**
+ * Default parameters
+ */
+#ifndef WE_UKF_KI
+#define WE_UKF_KI 0.f
+#endif
+#ifndef WE_UKF_ALPHA
+#define WE_UKF_ALPHA 0.5f
+#endif
+#ifndef WE_UKF_BETA
+#define WE_UKF_BETA 2.f
+#endif
+#ifndef WE_UKF_P0
+#define WE_UKF_P0 0.2f      // initial covariance diagonal element
+#endif
+#ifndef WE_UKF_R_GS
+#ifndef WE_UKF_R_GS 0.5f    // ground speed measurement confidence
+#endif
+#ifndef WE_UKF_R_VA
+#ifndef WE_UKF_R_VA 0.1f    // airspeed measurement confidence
+#endif
+#ifndef WE_UKF_R_AOA
+#ifndef WE_UKF_R_AOA 0.1f   // angle of attack measurement confidence
+#endif
+#ifndef WE_UKF_Q_VA
+#define WE_UKF_Q_VA 1.f     // airspeed model confidence
+#endif
+#ifndef WE_UKF_Q_WIND
+#define WE_UKF_Q_WIND 0.1f  // wind model confidence
+#endif
+
 #ifndef SEND_WIND_ESTIMATOR
 #define SEND_WIND_ESTIMATOR TRUE
 #endif
@@ -88,35 +119,34 @@ void init_calculator(void)
   // zero internal structure
   memset(&rtDW, 0, sizeof(DW));
 
-  MAT_EL(rtU.P_i, 0, 0, 6) = 0.2;
-  MAT_EL(rtU.P_i, 1, 1, 6) = 0.2;
-  MAT_EL(rtU.P_i, 2, 2, 6) = 0.2;
-  MAT_EL(rtU.P_i, 3, 3, 6) = 0.2;
-  MAT_EL(rtU.P_i, 4, 4, 6) = 0.2;
-  MAT_EL(rtU.P_i, 5, 5, 6) = 0.2;
+  MAT_EL(rtU.P_i, 0, 0, 6) = WE_UKF_P0;
+  MAT_EL(rtU.P_i, 1, 1, 6) = WE_UKF_P0;
+  MAT_EL(rtU.P_i, 2, 2, 6) = WE_UKF_P0;
+  MAT_EL(rtU.P_i, 3, 3, 6) = WE_UKF_P0;
+  MAT_EL(rtU.P_i, 4, 4, 6) = WE_UKF_P0;
+  MAT_EL(rtU.P_i, 5, 5, 6) = WE_UKF_P0;
 
-  MAT_EL(rtU.R, 0, 0, 5) = powf(0.5, 2);
-  MAT_EL(rtU.R, 1, 1, 5) = powf(0.5, 2);
-  MAT_EL(rtU.R, 2, 2, 5) = powf(0.5, 2);
-  MAT_EL(rtU.R, 3, 3, 5) = powf(0.1, 2);
-  MAT_EL(rtU.R, 4, 4, 5) = powf(0.1, 2);
+  MAT_EL(rtU.R, 0, 0, 5) = powf(WE_UKF_GS, 2);
+  MAT_EL(rtU.R, 1, 1, 5) = powf(WE_UKF_GS, 2);
+  MAT_EL(rtU.R, 2, 2, 5) = powf(WE_UKF_GS, 2);
+  MAT_EL(rtU.R, 3, 3, 5) = powf(WE_UKF_VA, 2);
+  MAT_EL(rtU.R, 4, 4, 5) = powf(WE_UKF_AOA, 2);
 
-  MAT_EL(rtU.Q, 0, 0, 6) = powf(1.0, 2);
-  MAT_EL(rtU.Q, 1, 1, 6) = powf(1.0, 2);
-  MAT_EL(rtU.Q, 2, 2, 6) = powf(1.0, 2);
-  MAT_EL(rtU.Q, 3, 3, 6) = powf(0.1, 2);
-  MAT_EL(rtU.Q, 4, 4, 6) = powf(0.1, 2);
-  MAT_EL(rtU.Q, 5, 5, 6) = powf(0.1, 2);
+  MAT_EL(rtU.Q, 0, 0, 6) = powf(WE_UKF_Q_VA, 2);
+  MAT_EL(rtU.Q, 1, 1, 6) = powf(WE_UKF_Q_VA, 2);
+  MAT_EL(rtU.Q, 2, 2, 6) = powf(WE_UKF_Q_VA, 2);
+  MAT_EL(rtU.Q, 3, 3, 6) = powf(WE_UKF_Q_WIND, 2);
+  MAT_EL(rtU.Q, 4, 4, 6) = powf(WE_UKF_Q_WIND, 2);
+  MAT_EL(rtU.Q, 5, 5, 6) = powf(WE_UKF_Q_WIND, 2);
 
-  rtU.ki = 0.;
-  rtU.alpha = 0.5;
-  rtU.beta = 2.;
+  rtU.ki = WE_UKF_KI;
+  rtU.alpha = WE_UKF_ALPHA;
+  rtU.beta = WE_UKF_BETA;
   rtU.dt = WIND_ESTIMATOR_PERIODIC_PERIOD; // actually measured later
 
   data_to_state = false;
   time_step_before = 0;
   time_calculator_dt = 0.f;
-
   wind_estimator_reset = false;
 }
 
