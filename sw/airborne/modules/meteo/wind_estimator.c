@@ -35,13 +35,13 @@
 #define WE_UKF_P0 0.2f      // initial covariance diagonal element
 #endif
 #ifndef WE_UKF_R_GS
-#ifndef WE_UKF_R_GS 0.5f    // ground speed measurement confidence
+#define WE_UKF_R_GS 0.5f    // ground speed measurement confidence
 #endif
 #ifndef WE_UKF_R_VA
-#ifndef WE_UKF_R_VA 0.1f    // airspeed measurement confidence
+#define WE_UKF_R_VA 0.1f    // airspeed measurement confidence
 #endif
 #ifndef WE_UKF_R_AOA
-#ifndef WE_UKF_R_AOA 0.1f   // angle of attack measurement confidence
+#define WE_UKF_R_AOA 0.1f   // angle of attack measurement confidence
 #endif
 #ifndef WE_UKF_Q_VA
 #define WE_UKF_Q_VA 1.f     // airspeed model confidence
@@ -126,11 +126,11 @@ void init_calculator(void)
   MAT_EL(rtU.P_i, 4, 4, 6) = WE_UKF_P0;
   MAT_EL(rtU.P_i, 5, 5, 6) = WE_UKF_P0;
 
-  MAT_EL(rtU.R, 0, 0, 5) = powf(WE_UKF_GS, 2);
-  MAT_EL(rtU.R, 1, 1, 5) = powf(WE_UKF_GS, 2);
-  MAT_EL(rtU.R, 2, 2, 5) = powf(WE_UKF_GS, 2);
-  MAT_EL(rtU.R, 3, 3, 5) = powf(WE_UKF_VA, 2);
-  MAT_EL(rtU.R, 4, 4, 5) = powf(WE_UKF_AOA, 2);
+  MAT_EL(rtU.R, 0, 0, 5) = powf(WE_UKF_R_GS, 2);
+  MAT_EL(rtU.R, 1, 1, 5) = powf(WE_UKF_R_GS, 2);
+  MAT_EL(rtU.R, 2, 2, 5) = powf(WE_UKF_R_GS, 2);
+  MAT_EL(rtU.R, 3, 3, 5) = powf(WE_UKF_R_VA, 2);
+  MAT_EL(rtU.R, 4, 4, 5) = powf(WE_UKF_R_AOA, 2);
 
   MAT_EL(rtU.Q, 0, 0, 6) = powf(WE_UKF_Q_VA, 2);
   MAT_EL(rtU.Q, 1, 1, 6) = powf(WE_UKF_Q_VA, 2);
