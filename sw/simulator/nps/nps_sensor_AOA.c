@@ -71,13 +71,6 @@ void nps_sensor_AOA_run_step(struct NpsSensorAOA *AOA, double time)
   AOA->value = fdm.AOA + AOA->offset;
   /* add noise with std dev rad */
   AOA->value += get_gaussian_noise() * AOA->noise_std_dev;
-  /* can't bet more than PI */
-  if( M_PI < AOA->value){
-	  AOA->value =0;
-  }	
-  if( -M_PI > AOA->value){
-	  AOA->value =0;
-  }
 
   AOA->next_update += NPS_AOA_DT;
   AOA->data_available = TRUE;

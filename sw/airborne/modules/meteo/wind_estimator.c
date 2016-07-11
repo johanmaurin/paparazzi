@@ -9,19 +9,77 @@
  * @author Maurin
  * Wind Estimator
  */
-#include "std.h"
-#include "ff.h"
-#include "pprzlink/pprzlink_device.h"
+
+#include "modules/meteo/wind_estimator.h"
+#include "lib_ukf_wind_estimator/Gen_UKF.h"
+#include "generated/modules.h"
 #include "state.h"
+#include <string.h>
 #include <ch.h>
 #include <hal.h>
-#include "main_chibios.h"
 #include "mcu_periph/sys_time.h"
-#include "modules/loggers/sdlog_chibios/sdLog.h"
-#include "modules/loggers/sdlog_chibios/usbStorage.h"
+
+/**
+ * Default parameters
+ */
+#ifndef WE_UKF_KI
+#define WE_UKF_KI 0.f
+#endif
+#ifndef WE_UKF_ALPHA
+#define WE_UKF_ALPHA 0.5f
+#endif
+#ifndef WE_UKF_BETA
+#define WE_UKF_BETA 2.f
+#endif
+#ifndef WE_UKF_P0
+#define WE_UKF_P0 0.2f      // initial covariance diagonal element
+#endif
+#ifndef WE_UKF_R_GS
+#define WE_UKF_R_GS 0.5f    // ground speed measurement confidence
+#endif
+#ifndef WE_UKF_R_VA
+#define WE_UKF_R_VA 0.1f    // airspeed measurement confidence
+#endif
+#ifndef WE_UKF_R_AOA
+#define WE_UKF_R_AOA 0.1f   // angle of attack measurement confidence
+#endif
+#ifndef WE_UKF_Q_VA
+#define WE_UKF_Q_VA 1.f     // airspeed model confidence
+#endif
+#ifndef WE_UKF_Q_WIND
+#define WE_UKF_Q_WIND 0.1f  // wind model confidence
+#endif
+
+#ifndef SEND_WIND_ESTIMATOR
+#define SEND_WIND_ESTIMATOR TRUE
+#endif
+
+#include "subsystems/datalink/downlink.h"
+
+static void send_wind_estimator(struct transport_tx *trans, struct link_device *dev)
+{
+  uint8_t flags = 7; // send all data
+  float upwind = -Answer_State_Wind.storage.wz;
+  pprz_msg_send_WIND_INFO_RET(trans, dev, AC_ID,
+      &flags,
+      &Answer_State_Wind.storage.wy, // east
+      &Answer_State_Wind.storage.wx, // north
+      &upwind,
+      &Answer_State_Wind.storage.u);
+}
+
+#if PERIODIC_TELEMETRY
+#include "subsystems/datalink/telemetry.h"
+#endif
+
+#ifndef LOG_WIND_ESTIMATOR
+#define LOG_WIND_ESTIMATOR FALSE
+#endif
+
+#if LOG_WIND_ESTIMATOR
 #include "modules/loggers/sdlog_chibios.h"
-#include "wind_estimator.h"
-#include "lib_ukf_wind_estimator/Gen_UKF.h"
+static bool log_we_started;
+#endif
 
 // matrix element
 #define MAT_EL(_m, _l, _c, _n) _m[_l + _c * _n]
@@ -30,30 +88,75 @@
 static MUTEX_DECL(writeread_state_mtx);
 static SEMAPHORE_DECL(readwrite_state_sem, 0);
 
-int data_to_State = 0;          //Flag for event to write new data in State
-int first_time = 1;
-
-int time_step_before;
-int time_calculator_dt;
-
-struct FloatVect2 NE_Wind_f;
+static bool data_to_state;          // flag for event to write new data in State
+static uint32_t time_step_before;   // last periodic time
+static float time_calculator_dt;    // calculated DT
+bool wind_estimator_reset;
 
 /* Data use by the calculator */
 union Data_State_Wind Data_State_Wind;
 union Answer_State_Wind Answer_State_Wind;
 
-/*----------------------------------------------------*/
-/*
- * Start wind estimation thread
+/* Thread declaration
+ * MATLAB UKF is using at least 5KB of stack
  */
 static THD_WORKING_AREA(wa_thd_windestimation, 6 * 1024);
 static __attribute__((noreturn)) void thd_windestimate(void *arg);
 
-/*----------------get_data_from_state-----------------*/
+/*----------------init_calculator---------------------*/
+/* Init fonction to init different type of variable   */
+/*  for the calculator before to calculate            */
+/*----------------------------------------------------*/
+void init_calculator(void)
+{
+  Gen_UKF_initialize();
+
+  // FIXME would be better to force Matlab to do this in initialize function
+  // zero input vector
+  memset(&rtU, 0, sizeof(ExtU));
+  // zero output vector
+  memset(&rtY, 0, sizeof(ExtY));
+  // zero internal structure
+  memset(&rtDW, 0, sizeof(DW));
+
+  MAT_EL(rtU.P_i, 0, 0, 6) = WE_UKF_P0;
+  MAT_EL(rtU.P_i, 1, 1, 6) = WE_UKF_P0;
+  MAT_EL(rtU.P_i, 2, 2, 6) = WE_UKF_P0;
+  MAT_EL(rtU.P_i, 3, 3, 6) = WE_UKF_P0;
+  MAT_EL(rtU.P_i, 4, 4, 6) = WE_UKF_P0;
+  MAT_EL(rtU.P_i, 5, 5, 6) = WE_UKF_P0;
+
+  MAT_EL(rtU.R, 0, 0, 5) = powf(WE_UKF_R_GS, 2);
+  MAT_EL(rtU.R, 1, 1, 5) = powf(WE_UKF_R_GS, 2);
+  MAT_EL(rtU.R, 2, 2, 5) = powf(WE_UKF_R_GS, 2);
+  MAT_EL(rtU.R, 3, 3, 5) = powf(WE_UKF_R_VA, 2);
+  MAT_EL(rtU.R, 4, 4, 5) = powf(WE_UKF_R_AOA, 2);
+
+  MAT_EL(rtU.Q, 0, 0, 6) = powf(WE_UKF_Q_VA, 2);
+  MAT_EL(rtU.Q, 1, 1, 6) = powf(WE_UKF_Q_VA, 2);
+  MAT_EL(rtU.Q, 2, 2, 6) = powf(WE_UKF_Q_VA, 2);
+  MAT_EL(rtU.Q, 3, 3, 6) = powf(WE_UKF_Q_WIND, 2);
+  MAT_EL(rtU.Q, 4, 4, 6) = powf(WE_UKF_Q_WIND, 2);
+  MAT_EL(rtU.Q, 5, 5, 6) = powf(WE_UKF_Q_WIND, 2);
+
+  rtU.ki = WE_UKF_KI;
+  rtU.alpha = WE_UKF_ALPHA;
+  rtU.beta = WE_UKF_BETA;
+  rtU.dt = WIND_ESTIMATOR_PERIODIC_PERIOD; // actually measured later
+
+  data_to_state = false;
+  time_step_before = 0;
+  time_calculator_dt = 0.f;
+  wind_estimator_reset = false;
+}
+
+/*----------------wind_estimator_periodic-------------*/
 /*  Put Data from State in struct use by the Thread   */
 /*----------------------------------------------------*/
-void get_data_from_state(void)
+void wind_estimator_periodic(void)
 {
+  // try to lock mutex without blocking
+  // if it fails, it means that previous computation took too long
   if (chMtxTryLock(&writeread_state_mtx)) {
     // get "fake" IMU data in body frame
     struct FloatVect3 accel_ned = {
@@ -66,11 +169,11 @@ void get_data_from_state(void)
     struct FloatVect3 accel_body;
     float_rmat_vmult(&accel_body, ned_to_body, &accel_ned);
 
-    Data_State_Wind.storage.omega = *stateGetBodyRates_f(); //   rad/s
+    Data_State_Wind.storage.rates= *stateGetBodyRates_f(); //   rad/s
     //Data_State_Wind.storage.omega_A = *stateGetAccelNed_f(); //   m/s^2
-    Data_State_Wind.storage.omega_A.x = accel_body.x; //   m/s^2
-    Data_State_Wind.storage.omega_A.y = accel_body.y; //   m/s^2
-    Data_State_Wind.storage.omega_A.z = accel_body.z; //   m/s^2
+    Data_State_Wind.storage.accel.x = accel_body.x; //   m/s^2
+    Data_State_Wind.storage.accel.y = accel_body.y; //   m/s^2
+    Data_State_Wind.storage.accel.z = accel_body.z; //   m/s^2
     Data_State_Wind.storage.Zk_V = *stateGetSpeedNed_f(); //    m/s
     //Data_State_Wind.storage.Zk_Va =  stateGetAirspeed_f() * cosf(stateGetAngleOfAttack_f());  //    m/s  // projection de la norme qur l'axe X (cos sin)
     Data_State_Wind.storage.Zk_Va =  stateGetAirspeed_f();  //    m/s  // projection de la norme qur l'axe X (cos sin)
@@ -83,24 +186,31 @@ void get_data_from_state(void)
   }
 }
 
-/*-----------------put_data_to_State------------------*/
+/*----------------- wind_estimator_event -------------*/
 /*  Fonction put data in State                        */
 /*----------------------------------------------------*/
-void put_data_to_State(void)
+void wind_estimator_event(void)
 {
-  if (data_to_State == 1) {
+  if (data_to_state == 1) {
 
     chMtxLock(&writeread_state_mtx);
 
-    NE_Wind_f.x = Answer_State_Wind.storage_tab_float[3];
-    NE_Wind_f.y = Answer_State_Wind.storage_tab_float[4];
+    struct FloatVect2 wind_ne = {
+      Answer_State_Wind.storage.wx,
+      Answer_State_Wind.storage.wy
+    };
 
-    stateSetAirspeed_f(Answer_State_Wind.storage_tab_float[0]);     //NEED CHECK
-    stateSetHorizontalWindspeed_f(&NE_Wind_f);                //NEED CHECK
-    stateSetVerticalWindspeed_f(Answer_State_Wind.storage_tab_float[5]);   //NEED CHECK
+    stateSetAirspeed_f(Answer_State_Wind.storage.u);           // FIXME compute norm ?
+    stateSetHorizontalWindspeed_f(&wind_ne);                   //NEED CHECK
+    stateSetVerticalWindspeed_f(Answer_State_Wind.storage.wz); //NEED CHECK
+
+#if SEND_WIND_ESTIMATOR
+    // send over telemetry
+    send_wind_estimator(&(DefaultChannel).trans_tx, &(DefaultDevice).device);
+#endif
 
     chMtxUnlock(&writeread_state_mtx);
-    data_to_State = 0;
+    data_to_state = 0;
   }
 }
 
@@ -109,13 +219,7 @@ void put_data_to_State(void)
 /*----------------------------------------------------*/
 void get_wind_from_wind_estimation(void)
 {
-  int j;
-
-  j = 0;
-  for (int i = 0; i < NBR_ANSWER; i++) {
-    Answer_State_Wind.storage_tab_float[i] = (float)rtY.xout[j];
-    j++;
-  }
+  memcpy((void *)Answer_State_Wind.storage_tab_float, (void *)rtY.xout, NBR_ANSWER * sizeof(float));
 }
 
 /*-----parse_data_for_wind_estimation-----------------*/
@@ -145,7 +249,7 @@ void parse_data_for_wind_estimation(void)
   /*Put data in Phi*/
   rtU.phi = Data_State_Wind.storage_tab_float[i];
   i++;
-  /*Put data in Alpha*/
+  /*Put data in Theta*/
   rtU.theta = Data_State_Wind.storage_tab_float[i];
 
   rtU.dt = time_calculator_dt;
@@ -157,80 +261,112 @@ void parse_data_for_wind_estimation(void)
 static void thd_windestimate(void *arg)
 {
   (void) arg;
-  chRegSetThreadName("Start wind estimation");
+  chRegSetThreadName("wind estimation");
 
-  while (TRUE) {
+  while (true) {
 
+    // wait for incoming request signal
     chSemWait(&readwrite_state_sem);
 
-    chMtxLock(&writeread_state_mtx);
-
-    if (first_time == 1) {
-      time_step_before = get_sys_time_msec();
-      time_step_before = 0.02;
-      first_time = 0;
-    } else {
-      time_calculator_dt = (get_sys_time_msec() - time_step_before) / 1000;
-      time_step_before = get_sys_time_msec();
+    if (wind_estimator_reset) {
+      init_calculator();
     }
 
-    parse_data_for_wind_estimation();
-    Gen_UKF_step();
-    get_wind_from_wind_estimation();
+#if LOG_WIND_ESTIMATOR
+  if (pprzLogFile != -1) {
+    if (!log_we_started) {
+      // print header with initial parameters
+      int i;
+      sdLogWriteLog(pprzLogFile, "# Wind Estimator\n#\n");
+      sdLogWriteLog(pprzLogFile, "# Q = diag( ");
+      for (i = 0; i < 6; i++)
+        sdLogWriteLog(pprzLogFile, "%.5f ", MAT_EL(rtU.Q, i, i, 6));
+      sdLogWriteLog(pprzLogFile, ")\n");
+      sdLogWriteLog(pprzLogFile, "# R = diag( ");
+      for (i = 0; i < 5; i++)
+        sdLogWriteLog(pprzLogFile, "%.5f ", MAT_EL(rtU.R, i, i, 5));
+      sdLogWriteLog(pprzLogFile, ")\n");
+      sdLogWriteLog(pprzLogFile, "# ki = %.5f\n", rtU.ki);
+      sdLogWriteLog(pprzLogFile, "# alpha = %.5f\n", rtU.alpha);
+      sdLogWriteLog(pprzLogFile, "# beta = %.5f\n", rtU.beta);
+      sdLogWriteLog(pprzLogFile, "#\n");
+      sdLogWriteLog(pprzLogFile, "p q r ax ay az vkx vky vkz va aoa q1 q2 q3 q4 phi theta u v w wx wy wz t\n");
+      log_we_started = true;
+    }
+    sdLogWriteLog(pprzLogFile, "%.5f %.5f %.5f %.3f %.3f %.3f %.2f %.2f %.2f %.2f %.5f %.5f %.5f %.5f %.5f %.4f %.4f",
+        Data_State_Wind.storage.rates.p,
+        Data_State_Wind.storage.rates.q,
+        Data_State_Wind.storage.rates.r,
+        Data_State_Wind.storage.accel.x,
+        Data_State_Wind.storage.accel.y,
+        Data_State_Wind.storage.accel.z,
+        Data_State_Wind.storage.Zk_V.x,
+        Data_State_Wind.storage.Zk_V.y,
+        Data_State_Wind.storage.Zk_V.z,
+        Data_State_Wind.storage.Zk_Va,
+        Data_State_Wind.storage.Zk_AOA,
+        Data_State_Wind.storage.q.qi,
+        Data_State_Wind.storage.q.qx,
+        Data_State_Wind.storage.q.qy,
+        Data_State_Wind.storage.q.qz,
+        Data_State_Wind.storage.phi,
+        Data_State_Wind.storage.theta
+        );
+    }
+#endif
 
-    chMtxUnlock(&writeread_state_mtx);
-    data_to_State = 1;
+    if (time_step_before == 0) {
+      time_step_before = get_sys_time_msec();
+    } else {
+      // lock state
+      chMtxLock(&writeread_state_mtx);
+      // compute DT
+      time_calculator_dt = (get_sys_time_msec() - time_step_before) / 1000.f;
+      time_step_before = get_sys_time_msec();
+      // copy data and run estimation
+      parse_data_for_wind_estimation();
+      Gen_UKF_step();
+      get_wind_from_wind_estimation();
+      // unlock and set ready flag
+      chMtxUnlock(&writeread_state_mtx);
+      data_to_state = true;
+    }
+
+#if LOG_WIND_ESTIMATOR
+    if (log_we_started) {
+      sdLogWriteLog(pprzLogFile, "%.3f %.3f %.3f %.3f %.3f %.3f %d\n",
+          Answer_State_Wind.storage.u,
+          Answer_State_Wind.storage.v,
+          Answer_State_Wind.storage.w,
+          Answer_State_Wind.storage.wx,
+          Answer_State_Wind.storage.wy,
+          Answer_State_Wind.storage.wz,
+          time_step_before
+          );
+    }
+#endif
+
   }
 }
 
-/*----------------init_calculator---------------------*/
-/* Init fonction to init different type of variable   */
-/*  for the calculator before to calculate            */
-/*----------------------------------------------------*/
-void init_calculator(void)
-{
-
-  Gen_UKF_initialize();
-
-  memset(rtU.x0, 0, 6 * sizeof(float));
-
-  memset(rtU.P_i, 0, 36 * sizeof(float));
-  MAT_EL(rtU.P_i, 0, 0, 6) = 0.2;
-  MAT_EL(rtU.P_i, 1, 1, 6) = 0.2;
-  MAT_EL(rtU.P_i, 2, 2, 6) = 0.2;
-  MAT_EL(rtU.P_i, 3, 3, 6) = 0.2;
-  MAT_EL(rtU.P_i, 4, 4, 6) = 0.2;
-  MAT_EL(rtU.P_i, 5, 5, 6) = 0.2;
-
-  memset(rtU.R, 0, 25 * sizeof(float));
-  MAT_EL(rtU.R, 0, 0, 5) = powf(0.5, 2);
-  MAT_EL(rtU.R, 1, 1, 5) = powf(0.5, 2);
-  MAT_EL(rtU.R, 2, 2, 5) = powf(0.5, 2);
-  MAT_EL(rtU.R, 3, 3, 5) = powf(0.01, 2);
-  MAT_EL(rtU.R, 4, 4, 5) = powf(0.001, 2);
-
-  memset(rtU.Q, 0, 36 * sizeof(float));
-  MAT_EL(rtU.Q, 0, 0, 6) = powf(1, 2);
-  MAT_EL(rtU.Q, 1, 1, 6) = powf(1, 2);
-  MAT_EL(rtU.Q, 2, 2, 6) = powf(1, 2);
-  MAT_EL(rtU.Q, 3, 3, 6) = powf(0.1, 2);
-  MAT_EL(rtU.Q, 4, 4, 6) = powf(0.1, 2);
-  MAT_EL(rtU.Q, 5, 5, 6) = powf(0.1, 2);
-
-  rtU.ki = 0.;
-  rtU.alpha = 0.5;
-  rtU.beta = 2;
-  rtU.dt = 0.1; // FIXME measure time
-
-}
 /*-----------------wind_estimator_init----------------*/
-/*  Init the Thread and the calculator          */
+/*  Init the Thread and the calculator                */
 /*----------------------------------------------------*/
 void wind_estimator_init(void)
 {
   init_calculator();
 
+#if LOG_WIND_ESTIMATOR
+  log_we_started = false;
+#endif
+
   // Start wind estimation thread
   chThdCreateStatic(wa_thd_windestimation, sizeof(wa_thd_windestimation),
                     NORMALPRIO + 2, thd_windestimate, NULL);
+
+#if PERIODIC_TELEMETRY
+  // register for periodic telemetry (for logging with flight recorder)
+  register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_WIND_INFO_RET, send_wind_estimator);
+#endif
 }
+
