@@ -1,5 +1,5 @@
 from __future__ import absolute_import, print_function, division
-from .mesonh_atmosphere import MesoNHAtmosphere
+from mesonh_atmosphere import MesoNHAtmosphere
 import os
 import sys
 import signal
@@ -8,13 +8,13 @@ import socket
 import struct
 import cmath
 import numpy as np
-
+from os import getenv
 # if PAPARAZZI_SRC not set, then assume the tree containing this
 # file is a reasonable substitute
-PPRZ_SRC = getenv("PAPARAZZI_SRC", path.normpath(path.join(path.dirname(path.abspath(__file__)), '../../../')))
+PPRZ_SRC = getenv("PAPARAZZI_SRC", os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../../')))
 sys.path.append(PPRZ_SRC + "/sw/ext/pprzlink/lib/v1.0/python")
 
-from ivy_msg_interface import IvyMessagesInterface
+from pprzlink.ivy import IvyMessagesInterface
 from pprzlink.message import PprzMessage
 
 M_IN_KM = 1000.
@@ -34,11 +34,15 @@ start_time = time.time()
 
 
 def get_wind(east, north, up):
-    t = time.time() - start_time
-    loc = np.array([t, up, east, north])
-    loc = loc*scale + origin
-    weast, wnorth, wup = atm.get_wind(loc, method='linear')
-    return weast, wnorth, wup
+	t = time.time() - start_time
+	print("east :",east)
+	print("north :",north)
+	print("up :",up)
+	loc = np.array([t, up, east, north])
+	loc = loc*scale + origin
+	print("loc:",loc)
+	weast, wnorth, wup = atm.get_wind(loc)
+	return weast, wnorth, wup
 
 
 def ivy_request_callback(sender, msg, resp, *args, **kwargs):
@@ -58,17 +62,24 @@ def worldenv_cb(ac_id, msg):
         Callback for paparazzi WORLD_ENV requests
     """
     # request location (in meters)
-    east, north, up = float(m.get_field(3)),\
-        float(m.get_field(4)),\
-        float(m.get_field(5))
-
+    east, north, up = float(msg.get_field(3)),\
+        float(msg.get_field(4)),\
+        float(msg.get_field(5))
+    up *= -1
     # convert in km + translation with mesoNH origin
     weast, wnorth, wup = get_wind(east, north, up)
-
-    # set values for messages. values after wind are
-    # default so that simulator is not thrown off
-    r.set_values((weast, wnorth, wup, 400, 1, 1))
-    return r
+    print("wind_est:")
+    print(weast)
+    print(wnorth)
+    print(wup)
+    msg_back=PprzMessage("ground", "WORLD_ENV")
+    msg_back.set_value_by_name("wind_east",weast)
+    msg_back.set_value_by_name("wind_north",wnorth)
+    msg_back.set_value_by_name("wind_up",wup)
+    msg_back.set_value_by_name("ir_contrast",400)
+    msg_back.set_value_by_name("time_scale",1)
+    msg_back.set_value_by_name("gps_availability",1)
+    ivy.send(msg_back,None)
 
 
 def ivy_callback(acid, msg):
@@ -180,7 +191,7 @@ def main():
     # init ivy and register callback for WORLD_ENV_REQ and NPS_SPEED_POS
     global ivy
     ivy = IvyMessagesInterface("MesoNH");
-    ivy.subscribe(worldenv_cb, regexp='(.* WORLD_ENV_REQ .*)')
+    ivy.subscribe(worldenv_cb,'(.* WORLD_ENV_REQ .*)')
 
     # wait for ivy to stop
     from ivy.std_api import IvyMainLoop
